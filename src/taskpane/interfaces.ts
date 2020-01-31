@@ -3,9 +3,11 @@ export interface Credentials {
     password: string
 }
 
+
+export interface Project {
+    id:     string
+    name:   string
+}
 export interface User {
-    // id:         string
     name:       string
-    // username:   string
-    // email:      string
 }

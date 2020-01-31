@@ -1,4 +1,4 @@
-// import AuthStore from './AuthStore'
+import store from '../taskpane/store';
 
 const NaeptApi = {
 
@@ -7,7 +7,7 @@ const NaeptApi = {
             headers: {
                 'Accept'            : 'application/json',
                 'Content-Type'      : 'application/json',
-                // 'Authorization'     : 'Bearer ' + AuthStore.getAuthToken,
+                'Authorization'     : 'Bearer ' + store.getState().auth.token,
             },
             ...options
         })

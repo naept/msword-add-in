@@ -1,7 +1,7 @@
 import * as React from "react";
-import Header from "./Header";
 import Progress from "./Progress";
 import LoginForm from "./LoginForm";
+import ImportView from "./ImportView";
 import { Provider } from 'react-redux';
 import store from '../store';
 
@@ -22,14 +22,6 @@ class App extends React.Component<AppProps, AppState> {
     };
   }
 
-  renderLoginForm = () => {
-    if (store.getState().auth.token == '') {
-      return <LoginForm/>
-    } else {
-      return null
-    }
-  }
-
   render() {
     const { title, isOfficeInitialized } = this.props;
 
@@ -41,11 +33,9 @@ class App extends React.Component<AppProps, AppState> {
 
     return (
       <Provider store={store}>
-        <div className="ms-welcome">
-          <p>{ store.getState().auth.token }</p>
-          <Header logo="assets/logo-filled.png" title={this.props.title} message="Welcome" />
-          <this.renderLoginForm/>
-        </div>
+        <LoginForm/>
+        
+        <ImportView/>
       </Provider>
     );
   }

@@ -2,11 +2,10 @@ import * as React from "react";
 import { DefaultButton, TextField, MessageBar, MessageBarType } from 'office-ui-fabric-react';
 import { connect } from 'react-redux'
 import { login } from '../store/auth/actions'
-// import { AuthState } from '../store/auth/interfaces'
-// import store from "../store";
 
 export interface Props {
   token: string,
+  userName: string,
   login: Function,
 }
 
@@ -17,7 +16,7 @@ export interface State {
 }
 
 class LoginForm extends React.Component<Props, State> {
-  constructor(props) {
+  constructor(props: Props) {
     super(props);
     this.state = {
       email: '',
@@ -72,22 +71,36 @@ class LoginForm extends React.Component<Props, State> {
     }
   }
 
+  renderConnexionForm = () => {
+    if (this.props.token == "") {
+      return (
+        <div>
+          <TextField label="Email" type='email' value={this.state.email} onChange={this.handleEmailChange} />
+          <TextField label="Password" type='password' value={this.state.password} onChange={this.handlePasswordChange} />
+          <br/>
+          <DefaultButton onClick={ this.clickOnLogin }>Login</DefaultButton>
+        </div>
+      )
+    } else {
+      return (
+        <h4>Welcome { this.props.userName }</h4>
+      )
+    }
+  }
+
   render() {
     return (
       <section>
         <this.renderConnexionError/>
-        <TextField label="Email" type='email' value={this.state.email} onChange={this.handleEmailChange} />
-        <TextField label="Password" type='password' value={this.state.password} onChange={this.handlePasswordChange} />
-        <br/>
-        <DefaultButton className="ms-Grid-col ms-sm4 ms-smPush8" onClick={ this.clickOnLogin }>Login</DefaultButton>
-        <p>{ this.props.token }</p>
+        <this.renderConnexionForm/>
       </section>
     )
   }
 }
 
 const mapStateToProps = ({auth}) => ({
-    token: auth.token
+    token: auth.token,
+    userName: auth.user.name,
 })
 
 export default connect(mapStateToProps, { login })(LoginForm)

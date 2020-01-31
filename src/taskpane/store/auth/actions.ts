@@ -15,6 +15,15 @@ export const login = (credentials: Credentials) => (dispatch: typeof store.dispa
         dispatch({
             type: LOGIN,
             token: response.token,
+            user: response.user,
         })
+    })
+}
+
+export const logout = () => (dispatch: typeof store.dispatch) => {
+    dispatch({
+        type: LOGIN,
+        token: "",
+        user: {},
     })
 }

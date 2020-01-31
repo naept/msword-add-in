@@ -1,7 +1,10 @@
 import { AuthState, AuthActionTypes, LOGIN } from './interfaces'
 
 const initialState: AuthState = {
-  token: ""
+  token: "",
+  user: {
+    name: "",
+  }
 }
   
 export function authReducer (state = initialState, action: AuthActionTypes) {
@@ -9,8 +12,10 @@ export function authReducer (state = initialState, action: AuthActionTypes) {
     case LOGIN:
       return {
         ...state,
-        token: action.token
+        token: action.token,
+        user: action.user,
       }
+
     default:
       return state
   }
