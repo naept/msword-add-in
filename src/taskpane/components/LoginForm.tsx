@@ -1,12 +1,13 @@
 import * as React from "react";
 import { DefaultButton, TextField, MessageBar, MessageBarType } from 'office-ui-fabric-react';
 import { connect } from 'react-redux'
-import { login } from '../store/auth/actions'
+import { login, logout } from '../store/auth/actions'
 
 export interface Props {
   token: string,
   userName: string,
   login: Function,
+  logout: Function,
 }
 
 export interface State {
@@ -43,6 +44,10 @@ class LoginForm extends React.Component<Props, State> {
       })
       console.error(errors)
     })
+  }
+
+  clickOnLogout = () => {
+    this.props.logout()
   }
 
   handleEmailChange = (event) => {
@@ -83,7 +88,10 @@ class LoginForm extends React.Component<Props, State> {
       )
     } else {
       return (
-        <h4>Welcome { this.props.userName }</h4>
+        <div>
+          <h4>Welcome { this.props.userName }</h4>
+          <DefaultButton onClick={ this.clickOnLogout }>Logout</DefaultButton>
+        </div>
       )
     }
   }
@@ -103,4 +111,4 @@ const mapStateToProps = ({auth}) => ({
     userName: auth.user.name,
 })
 
-export default connect(mapStateToProps, { login })(LoginForm)
+export default connect(mapStateToProps, { login, logout })(LoginForm)

@@ -34,7 +34,6 @@ class App extends React.Component<AppProps, AppState> {
     return (
       <Provider store={store}>
         <LoginForm/>
-        
         <ImportView/>
       </Provider>
     );

@@ -1,4 +1,4 @@
-import { LOGIN } from './interfaces'
+import { LOGIN, LOGOUT } from './interfaces'
 import NaeptApi from '../../../naept/NaeptApi'
 import store from '..';
 import { Credentials } from '../../interfaces';
@@ -22,8 +22,6 @@ export const login = (credentials: Credentials) => (dispatch: typeof store.dispa
 
 export const logout = () => (dispatch: typeof store.dispatch) => {
     dispatch({
-        type: LOGIN,
-        token: "",
-        user: {},
+        type: LOGOUT
     })
 }

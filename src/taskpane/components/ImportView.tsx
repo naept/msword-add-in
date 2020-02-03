@@ -6,6 +6,7 @@ import { ComboBox, IComboBoxOption } from "office-ui-fabric-react";
 import { Project } from "../interfaces";
 
 export interface Props {
+  userAuthenticated: boolean
   loadUserProjects: Function
   projectsOptions : IComboBoxOption[]
 }
@@ -15,7 +16,6 @@ export interface State {
 }
 
 class ImportView extends React.Component<Props, State> {
-
 
   constructor(props: Props) {
     super(props);
@@ -28,7 +28,17 @@ class ImportView extends React.Component<Props, State> {
     }
   }
 
+  componentDidMount() {
+    if (this.props.userAuthenticated) {
+      this.props.loadUserProjects()
+    }
+  }
+
   render() {
+    if (!this.props.userAuthenticated) {
+      return null
+    }
+
     return (
       <section>
         <ComboBox
@@ -41,13 +51,14 @@ class ImportView extends React.Component<Props, State> {
   }
 }
 
-const mapStateToProps = ({projects}) => ({
+const mapStateToProps = ({auth, projects}) => ({
   projectsOptions: Object.values(projects.projects).map((project: Project) => {
     return {
       key:  project.id,
       text: project.name,
     }
   }),
+  userAuthenticated : auth.token != "",
 })
 
 
