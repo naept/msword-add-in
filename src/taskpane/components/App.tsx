@@ -1,7 +1,7 @@
 import * as React from "react";
 import Progress from "./Progress";
-import LoginForm from "./LoginForm";
-import ImportView from "./ImportView";
+import CommandBar from "./CommandBar";
+import MainView from "./MainView";
 import { Provider } from 'react-redux';
 import store from '../store';
 
@@ -33,8 +33,8 @@ class App extends React.Component<AppProps, AppState> {
 
     return (
       <Provider store={store}>
-        <LoginForm/>
-        <ImportView/>
+        <CommandBar/>
+        <MainView/>
       </Provider>
     );
   }

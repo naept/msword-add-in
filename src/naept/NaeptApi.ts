@@ -1,5 +1,3 @@
-import store from '../taskpane/store';
-
 const NaeptApi = {
 
     fetchNaeptApi(url: string, options: object = {}) : Promise<any> {
@@ -7,7 +5,7 @@ const NaeptApi = {
             headers: {
                 'Accept'            : 'application/json',
                 'Content-Type'      : 'application/json',
-                'Authorization'     : 'Bearer ' + store.getState().auth.token,
+                'Authorization'     : 'Bearer ' + localStorage.getItem('API_Key'),
             },
             ...options
         })
