@@ -7,7 +7,6 @@ const initialState: ProjectsState = {
 }
   
 export function projectsReducer (state = initialState, action: ProjectsActionTypes) {
-  console.log('projectsReducer ' + action.type)
   switch(action.type){
     case ADD_PROJECT:
       let project = action.project
