@@ -1,18 +1,21 @@
 import * as React from "react";
 import { connect } from 'react-redux'
-import { subscribe } from 'redux-subscriber';
-import { loadUserProjects } from '../store/project/actions'
+// import { subscribe } from 'redux-subscriber';
+import { loadUserProjects, loadProjectDocuments } from '../store/project/actions'
 import { ComboBox, IComboBoxOption } from "office-ui-fabric-react";
-import { Project } from "../interfaces";
+import { Project, Document } from "../interfaces";
 
 export interface Props {
   userAuthenticated: boolean
   loadUserProjects: Function
+  loadProjectDocuments: Function
   projectsOptions : IComboBoxOption[]
+  documentsOptions : IComboBoxOption[]
 }
 
 export interface State {
-  unsubscribe:      Function
+  project: Project
+  document: Document
 }
 
 class ImportView extends React.Component<Props, State> {
@@ -20,46 +23,89 @@ class ImportView extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
-      unsubscribe: subscribe('auth.token', state => {
-        if (state.auth.token != "") {
-          this.props.loadUserProjects()
-        }
-      }),
+      project: {
+        id: '',
+        name: ''
+      },
+      document: {
+        id: '',
+        name: ''
+      },
     }
   }
 
   componentDidMount() {
-    if (this.props.userAuthenticated) {
-      this.props.loadUserProjects()
+    this.props.loadUserProjects()
+  }
+
+  handleProjectSelectChange = (event, option) => {
+    if (event) {
+      this.setState((state) => ({
+        project: {
+          ...state.project,
+          id: option.key,
+          name: option.text,
+        },
+        document: {
+          ...state.document,
+          id: '',
+          name: '',
+        },
+      }))
+      this.props.loadProjectDocuments(option.key)
     }
   }
 
-  render() {
-    if (!this.props.userAuthenticated) {
-      return null
+  handleDocumentSelectChange = (event, option) => {
+    if (event) {
+      this.setState((state) => ({
+        document: {
+          ...state.document,
+          id: option.key,
+          name: option.text,
+        },
+      }))
+      // this.props.loadProjectDocuments(option.key)
     }
+  }
 
+
+
+  render() {
     return (
       <section>
         <ComboBox
           label="Select a project"
-          autoComplete="on"
           options={this.props.projectsOptions}
+          onChange={this.handleProjectSelectChange}
+          text={this.state.project.name}
+          disabled={this.props.projectsOptions.length == 0}
+        />
+        <ComboBox
+          label="Select a document"
+          options={this.props.documentsOptions}
+          onChange={this.handleDocumentSelectChange}
+          text={this.state.document.name}
+          disabled={this.props.documentsOptions.length == 0}
         />
       </section>
     )
   }
 }
 
-const mapStateToProps = ({auth, projects}) => ({
+const mapStateToProps = ({projects}) => ({
   projectsOptions: Object.values(projects.projects).map((project: Project) => {
     return {
       key:  project.id,
       text: project.name,
     }
   }),
-  userAuthenticated : auth.token != "",
+  documentsOptions: Object.values(projects.documents).map((document: Document) => {
+    return {
+      key:  document.id,
+      text: document.name,
+    }
+  }),
 })
 
-
-export default connect(mapStateToProps, { loadUserProjects })(ImportView)
+export default connect(mapStateToProps, { loadUserProjects, loadProjectDocuments })(ImportView)

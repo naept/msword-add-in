@@ -8,6 +8,11 @@ export interface Project {
     name:   string
 }
 
+export interface Document {
+    id:     string
+    name:   string
+}
+
 export interface User {
     name:       string
 }

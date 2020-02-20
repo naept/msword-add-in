@@ -1,14 +1,26 @@
-import { Project } from "../../interfaces";
+import { Project, Document } from "../../interfaces";
 
 export const ADD_PROJECT = 'ADD_PROJECT'
+export const CLEAR_DOCUMENTS = 'CLEAR_DOCUMENTS'
+export const ADD_DOCUMENT = 'ADD_DOCUMENT'
 
-interface AddProjectsAction {
+interface AddProjectAction {
     type:       typeof ADD_PROJECT
     project:    Project
 }
 
-export type ProjectsActionTypes = AddProjectsAction // | SomeOtherAction
+interface ClearDocumentsAction {
+    type:       typeof CLEAR_DOCUMENTS
+}
+
+interface AddDocumentAction {
+    type:       typeof ADD_DOCUMENT
+    document:   Document
+}
+
+export type ProjectsActionTypes = AddProjectAction | ClearDocumentsAction | AddDocumentAction
 
 export interface ProjectsState {
-    projects    : Project[]
+    projects    : {}
+    documents   : {}
 }
