@@ -17,6 +17,16 @@ const NaeptApi = {
             return json.then(err => {throw err})
           }
         })
+    },
+
+    getSelection() {
+      Word.run((context) => {
+        let selection = context.document.getSelection().getHtml()
+
+        return context.sync().then(() => {
+          return selection
+        })
+      })
     }
 }
 
