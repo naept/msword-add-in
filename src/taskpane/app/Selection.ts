@@ -1,65 +1,66 @@
+
 export default class Selection {
+    private selectionHtmlObject: HTMLDivElement = null
+
+    constructor() {
+        this.selectionHtmlObject = document.createElement('div')
+    }
 
     getSelectionHtml() {
         return Word.run((context) => {
             let selection = context.document.getSelection().getHtml()
         
             return context.sync().then(() => {
-              let inputHtmlObject = document.createElement('div');
-              inputHtmlObject.innerHTML = selection.value;
-              this.cleanHtmlElement(inputHtmlObject)
-              return inputHtmlObject.outerHTML.replace(/<span>/g, "").replace(/<\/span>/g, "")
+              this.selectionHtmlObject.innerHTML = selection.value
+              this.cleanHtmlElement()
+              return this.selectionHtmlObject.innerHTML
             })
         })
     }
 
-    cleanHtmlElement(rootElement: Element) {
-        this.removeAllTagAttributes(rootElement)
-        this.removeAllTags(rootElement, "meta")
-        this.removeAllTags(rootElement, "style")
-        this.reduceSingleChildDivs(rootElement)
+    cleanHtmlElement() {
+        this.removeAllTagAttributes()
+        this.removeAllNonBreakableSpaces()
+        this.removeAllTags("meta")
+        this.removeAllTags("style")
+        this.removeAllTags("span", false)
+        this.removeAllTags("div", false)
+        this.removeAllCarriageReturns()
     }
     
-
-    removeAllTagAttributes(rootElement: Element) {
-        rootElement.getAttributeNames().forEach((attributeName) => {
-            if (attributeName != "src") {
-                rootElement.removeAttribute(attributeName)
-            }
-        })
-        for (var i = 0; i < rootElement.children.length; i++) {
-            this.removeAllTagAttributes(rootElement.children[i])
-        }
-    }
-    
-    removeAllTags(rootElement: Element, tagName: string) {
-        let elementsToRemove = rootElement.getElementsByTagName(tagName)
-        for (var i = 0; i < elementsToRemove.length; i++) {
-            elementsToRemove[i].remove()
-        }
-    }
-    
-    reduceSingleChildDivs(rootElement: Element) {
-        let childrenElements = rootElement.children
-        if (childrenElements.length > 1) {
-            for (var i = 0; i < childrenElements.length; i++) {
-                this.reduceSingleChildDivs(childrenElements[i])
-            }
-        } else if (childrenElements.length == 1) {
-            if (rootElement.tagName.toLowerCase() == "div") {
-                let parentElement = rootElement.parentElement
-                if (parentElement) {
-                    parentElement.appendChild(childrenElements[0])
-                    parentElement.removeChild(rootElement)
-                    this.reduceSingleChildDivs(parentElement)
+    removeAllTagAttributes() {
+        const clearTags = (element: Element) => {
+            element.getAttributeNames().forEach((attributeName) => {
+                if (attributeName != "src") {
+                    element.removeAttribute(attributeName)
                 }
-            } else {
-                this.reduceSingleChildDivs(childrenElements[0])
-            }
-        } else {
-            if (rootElement.tagName.toLowerCase() == "div") {
-                rootElement.remove()
+            })
+            for (var i = 0; i < element.children.length; i++) {
+                clearTags(element.children[i])
             }
         }
+
+        clearTags(this.selectionHtmlObject)
     }
+    
+    removeAllTags(tagName: string, eraseContent: Boolean = true) {
+        if (eraseContent) {
+            let elementsToRemove = this.selectionHtmlObject.getElementsByTagName(tagName)
+            for (var i = 0; i < elementsToRemove.length; i++) {
+                elementsToRemove[i].remove()
+            }
+        }
+        const openTag = new RegExp("<" + tagName + ">", "g")
+        const closeTag = new RegExp("</" + tagName + ">", "g")
+        this.selectionHtmlObject.innerHTML = this.selectionHtmlObject.innerHTML.replace(openTag, "").replace(closeTag, "")
+    }
+
+    removeAllCarriageReturns() {
+        this.selectionHtmlObject.innerHTML = this.selectionHtmlObject.innerHTML.replace(/\n/g, "")
+    }
+
+    removeAllNonBreakableSpaces() {
+        this.selectionHtmlObject.innerHTML = this.selectionHtmlObject.innerHTML.replace(/&nbsp;/g, "")
+    }
+
 }
