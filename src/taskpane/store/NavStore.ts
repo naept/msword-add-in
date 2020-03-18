@@ -3,7 +3,6 @@ import { NavOption } from "../interfaces"
 declare type ChangeCallback = (store: NavStore) => void
 
 export default class NavStore {
-
     public nav: NavOption = NavOption.Main
     public errorMessage: String = null
 

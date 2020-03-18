@@ -1,23 +1,20 @@
 import * as React from "react";
+import NaeptApi from '../../naept/NaeptApi'
 import NavStore from '../store/NavStore'
 import { NavOption } from "../interfaces";
-import { connect } from 'react-redux'
-// import { subscribe } from 'redux-subscriber';
-import { loadUserProjects, loadProjectDocuments } from '../store/project/actions'
+import ProjectStore from '../store/ProjectStore'
 import { ComboBox, IComboBoxOption, Stack, Label, Spinner, SpinnerSize, SelectableOptionMenuItemType, TextField } from "office-ui-fabric-react";
+// import { ComboBox, IComboBoxOption, Stack, Label, Spinner, SpinnerSize, TextField } from "office-ui-fabric-react";
 import { Project, Document } from "../interfaces";
 
 interface Props {
   navStore: NavStore
-  userAuthenticated: boolean
-  loadUserProjects: Function
-  loadProjectDocuments: Function
-  projectsOptions : IComboBoxOption[]
-  documentsOptions : IComboBoxOption[]
 }
 
 interface State {
   fileName: string
+  projectsOptions : IComboBoxOption[]
+  documentsOptions : IComboBoxOption[]
   currentSelection: string
   project: Project
   document: Document
@@ -101,12 +98,18 @@ function getSelection() {
 }
 
 class ImportView extends React.Component<Props, State> {
+  private projectStore: ProjectStore = new ProjectStore()
+  private addProject: (project: Project) => void
+  private clearDocuments: () => void
+  private addDocument: (document: Document) => void
   private setNav: (nav: NavOption, errorMessage: String) => void
 
   constructor(props: Props) {
     super(props);
     this.state = {
       fileName: '',
+      projectsOptions: [],
+      documentsOptions: [],
       currentSelection: '',
       project: {
         id: '',
@@ -120,6 +123,45 @@ class ImportView extends React.Component<Props, State> {
       loadingDocuments: false,
     }
     this.setNav = this.props.navStore.setNav.bind(this.props.navStore)
+    
+    // On souscrit aux changements du store
+    this.projectStore.onChange((store) => {
+      this.setState({
+        projectsOptions: Object.values(store.projects)
+        .map((project: Project) => {
+          return {
+            key:  project.id,
+            text: project.name,
+            itemType: SelectableOptionMenuItemType.Normal,
+          }
+        }),
+        documentsOptions: Object.values(store.documents)
+        .map((document: Document) => {
+          return {
+            key:  document.id,
+            text: document.name,
+            itemType: SelectableOptionMenuItemType.Normal,
+          }
+        })
+        .concat([
+          {
+            key:  'divider',
+            text: '-',
+            itemType: SelectableOptionMenuItemType.Divider,
+          },
+          {
+            key:  'addNewDocument',
+            text: 'Add new document',
+            itemType: SelectableOptionMenuItemType.Normal,
+          },
+        ]),
+      })
+    })
+
+    // On injecte les méthodes du store en méthode du composant
+    this.addProject = this.projectStore.addProject.bind(this.projectStore)
+    this.clearDocuments = this.projectStore.clearDocuments.bind(this.projectStore)
+    this.addDocument = this.projectStore.addDocument.bind(this.projectStore)
   }
 
   componentDidMount() {
@@ -171,7 +213,7 @@ class ImportView extends React.Component<Props, State> {
       // })
     })
 
-    this.props.loadUserProjects()
+    this.loadUserProjects()
     .then(() => {
       this.setState(() => ({
         loadingProjects: false
@@ -181,6 +223,27 @@ class ImportView extends React.Component<Props, State> {
       if (error.error === "Unauthenticated.") {
         this.setNav(NavOption.Settings, "Authentication failed. Maybe your API key expired.")
       }
+    })
+  }
+
+  loadUserProjects() {
+    return NaeptApi.fetchNaeptApi('user/projects')
+    .then(response => {
+        let projects = response.data
+        projects.forEach((project: Project) =>
+            this.addProject(project)
+        )
+    })
+  }
+
+  loadProjectDocuments(project_id: String) {
+    return NaeptApi.fetchNaeptApi('projects/documents/' + project_id)
+    .then(response => {
+        this.clearDocuments()
+        let projects = response.data
+        projects.forEach((document: Document) =>
+            this.addDocument(document)
+        )
     })
   }
 
@@ -199,7 +262,8 @@ class ImportView extends React.Component<Props, State> {
         },
         loadingDocuments: true
       }))
-      this.props.loadProjectDocuments(option.key)
+
+      this.loadProjectDocuments(option.key)
       .then(() => {
         this.setState(() => ({
           loadingDocuments: false
@@ -223,25 +287,25 @@ class ImportView extends React.Component<Props, State> {
     }
   }
 
-  renderLoadingProjectsSpinner = () => {
-    if (this.state.loadingProjects) {
-      return (
-        <Spinner size={SpinnerSize.xSmall} />
-      )
-    } else {
-      return null
-    }
-  }
+  // renderLoadingProjectsSpinner = () => {
+  //   if (this.state.loadingProjects) {
+  //     return (
+  //       <Spinner size={SpinnerSize.xSmall} />
+  //     )
+  //   } else {
+  //     return null
+  //   }
+  // }
 
-  renderLoadingDocumentsSpinner = () => {
-    if (this.state.loadingDocuments) {
-      return (
-        <Spinner size={SpinnerSize.xSmall} />
-      )
-    } else {
-      return null
-    }
-  }
+  // renderLoadingDocumentsSpinner = () => {
+  //   if (this.state.loadingDocuments) {
+  //     return (
+  //       <Spinner size={SpinnerSize.xSmall} />
+  //     )
+  //   } else {
+  //     return null
+  //   }
+  // }
 
   renderNewDocumentForm = () => {
     if (this.state.document.id == 'addNewDocument') {
@@ -263,10 +327,10 @@ class ImportView extends React.Component<Props, State> {
       <section>
         <Stack horizontal={true} verticalAlign='center' tokens={{childrenGap: 10}}>
           <Label>Select a project</Label>
-          <this.renderLoadingProjectsSpinner/>
+          {this.state.loadingProjects && <Spinner size={SpinnerSize.xSmall} />}
         </Stack>
         <ComboBox
-          options={this.props.projectsOptions}
+          options={this.state.projectsOptions}
           onChange={this.handleProjectSelectChange}
           text={this.state.project.name}
           disabled={this.state.loadingProjects}
@@ -274,10 +338,10 @@ class ImportView extends React.Component<Props, State> {
 
         <Stack horizontal={true} verticalAlign='center' tokens={{childrenGap: 10}}>
           <Label>Select a document</Label>
-          <this.renderLoadingDocumentsSpinner/>
+          {this.state.loadingDocuments && <Spinner size={SpinnerSize.xSmall} />}
         </Stack>
         <ComboBox
-          options={this.props.documentsOptions}
+          options={this.state.documentsOptions}
           onChange={this.handleDocumentSelectChange}
           text={this.state.document.name}
           disabled={this.state.project.name == '' || this.state.loadingDocuments}
@@ -289,35 +353,35 @@ class ImportView extends React.Component<Props, State> {
   }
 }
 
-const mapStateToProps = ({projects}) => ({
-  projectsOptions: Object.values(projects.projects)
-  .map((project: Project) => {
-    return {
-      key:  project.id,
-      text: project.name,
-    }
-  }),
+// const mapStateToProps = ({projects}) => ({
+//   projectsOptions: Object.values(projects.projects)
+//   .map((project: Project) => {
+//     return {
+//       key:  project.id,
+//       text: project.name,
+//     }
+//   }),
 
-  documentsOptions: Object.values(projects.documents)
-  .map((document: Document) => {
-    return {
-      key:  document.id,
-      text: document.name,
-      itemType: SelectableOptionMenuItemType.Normal
-    }
-  })
-  .concat([
-    {
-      key:  'divider',
-      text: '-',
-      itemType: SelectableOptionMenuItemType.Divider
-    },
-    {
-      key:  'addNewDocument',
-      text: 'Add new document',
-      itemType: SelectableOptionMenuItemType.Normal
-    },
-  ]),
-})
+//   documentsOptions: Object.values(projects.documents)
+//   .map((document: Document) => {
+//     return {
+//       key:  document.id,
+//       text: document.name,
+//       itemType: SelectableOptionMenuItemType.Normal
+//     }
+//   })
+//   .concat([
+//     {
+//       key:  'divider',
+//       text: '-',
+//       itemType: SelectableOptionMenuItemType.Divider
+//     },
+//     {
+//       key:  'addNewDocument',
+//       text: 'Add new document',
+//       itemType: SelectableOptionMenuItemType.Normal
+//     },
+//   ]),
+// })
 
-export default connect(mapStateToProps, { loadUserProjects, loadProjectDocuments })(ImportView)
+export default ImportView

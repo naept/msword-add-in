@@ -2,8 +2,6 @@ import * as React from "react";
 import Progress from "./Progress";
 import CommandBar from "./CommandBar";
 import MainView from "./MainView";
-import { Provider } from 'react-redux';
-import store from '../store';
 import NavStore from '../store/NavStore'
 
 export interface AppProps {
@@ -34,10 +32,10 @@ class App extends React.Component<AppProps, AppState> {
     }
 
     return (
-      <Provider store={store}>
+      <div>
         <CommandBar navStore={this.navStore}/>
         <MainView navStore={this.navStore}/>
-      </Provider>
+      </div>
     );
   }
 }
