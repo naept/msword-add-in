@@ -5,6 +5,7 @@ declare type ChangeCallback = (store: NavStore) => void
 export default class NavStore {
 
     public nav: NavOption = NavOption.Main
+    public errorMessage: String = null
 
     private callbacks: ChangeCallback[] = []
 
@@ -22,9 +23,9 @@ export default class NavStore {
         this.callbacks.push(cb)
     }
 
-    setNav (nav: NavOption): void {
-        console.log(nav)
+    setNav (nav: NavOption, errorMessage: String = null): void {
         this.nav = nav
+        this.errorMessage = errorMessage;
         this.inform()
     }
 }

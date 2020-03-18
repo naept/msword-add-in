@@ -1,4 +1,3 @@
-// import { NavOption } from "../taskpane/interfaces";
 
 const NaeptApi = {
 
@@ -15,25 +14,21 @@ const NaeptApi = {
           let json = response.json()
           if (response.ok) {
             return json
-          // } else if (response.status === 401) {  // Unauthenticated
-          //   console.log("Pas connecté")
-            
-            // return setNav(NavOption.Settings)
           } else {
             return json.then(err => {throw err})
           }
         })
     },
 
-    getSelection() {
-      Word.run((context) => {
-        let selection = context.document.getSelection().getHtml()
+    // getSelection() {
+    //   Word.run((context) => {
+    //     let selection = context.document.getSelection().getHtml()
 
-        return context.sync().then(() => {
-          return selection
-        })
-      })
-    }
+    //     return context.sync().then(() => {
+    //       return selection
+    //     })
+    //   })
+    // }
 }
 
 export default NaeptApi

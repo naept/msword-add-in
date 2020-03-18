@@ -1,4 +1,6 @@
 import * as React from "react";
+import NavStore from '../store/NavStore'
+import { NavOption } from "../interfaces";
 import { connect } from 'react-redux'
 // import { subscribe } from 'redux-subscriber';
 import { loadUserProjects, loadProjectDocuments } from '../store/project/actions'
@@ -6,6 +8,7 @@ import { ComboBox, IComboBoxOption, Stack, Label, Spinner, SpinnerSize, Selectab
 import { Project, Document } from "../interfaces";
 
 interface Props {
+  navStore: NavStore
   userAuthenticated: boolean
   loadUserProjects: Function
   loadProjectDocuments: Function
@@ -98,6 +101,7 @@ function getSelection() {
 }
 
 class ImportView extends React.Component<Props, State> {
+  private setNav: (nav: NavOption, errorMessage: String) => void
 
   constructor(props: Props) {
     super(props);
@@ -115,6 +119,7 @@ class ImportView extends React.Component<Props, State> {
       loadingProjects: true,
       loadingDocuments: false,
     }
+    this.setNav = this.props.navStore.setNav.bind(this.props.navStore)
   }
 
   componentDidMount() {
@@ -173,7 +178,9 @@ class ImportView extends React.Component<Props, State> {
       }))
     })
     .catch((error) => {
-      console.error(error)
+      if (error.error === "Unauthenticated.") {
+        this.setNav(NavOption.Settings, "Authentication failed. Maybe your API key expired.")
+      }
     })
   }
 
