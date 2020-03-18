@@ -172,6 +172,9 @@ class ImportView extends React.Component<Props, State> {
         loadingProjects: false
       }))
     })
+    .catch((error) => {
+      console.error(error)
+    })
   }
 
   handleProjectSelectChange = (event, option) => {
@@ -194,6 +197,9 @@ class ImportView extends React.Component<Props, State> {
         this.setState(() => ({
           loadingDocuments: false
         }))
+      })
+      .catch((error) => {
+        console.error(error)
       })
     }
   }

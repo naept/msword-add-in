@@ -1,21 +1,22 @@
 import * as React from "react";
-import { connect } from 'react-redux'
-import { setNav } from '../store/nav/actions'
+import NavStore from '../store/NavStore'
 import { NavOption } from "../interfaces";
 import { CommandBar as CommandBarBase, ICommandBarItemProps } from "office-ui-fabric-react";
 
 export interface Props {
-  setNav: Function
+  navStore: NavStore
 }
 
 export interface State {
 }
 
 class CommandBar extends React.Component<Props, State> {
+  private setNav: (nav: NavOption) => void
 
   constructor(props: Props) {
     super(props);
     this.state = {}
+    this.setNav = this.props.navStore.setNav.bind(this.props.navStore)
   }
   
   _farItems: ICommandBarItemProps[] = [
@@ -25,7 +26,7 @@ class CommandBar extends React.Component<Props, State> {
       ariaLabel: 'Settings',
       iconOnly: true,
       iconProps: { iconName: 'Settings' },
-      onClick: () => this.props.setNav(NavOption.Settings)
+      onClick: () => this.setNav(NavOption.Settings),
     },
   ]
 
@@ -35,7 +36,7 @@ class CommandBar extends React.Component<Props, State> {
       text: 'Home',
       ariaLabel: 'Home',
       iconProps: { iconName: 'Home' },
-      onClick: () => this.props.setNav(NavOption.Main)
+      onClick: () => this.setNav(NavOption.Main),
     },
   ]
 
@@ -53,8 +54,4 @@ class CommandBar extends React.Component<Props, State> {
   }
 }
 
-const mapStateToProps = ({}) => ({
-  
-})
-
-export default connect(mapStateToProps, { setNav })(CommandBar)
+export default CommandBar

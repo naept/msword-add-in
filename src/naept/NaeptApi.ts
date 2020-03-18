@@ -1,7 +1,9 @@
+// import { NavOption } from "../taskpane/interfaces";
+
 const NaeptApi = {
 
     fetchNaeptApi(url: string, options: object = {}) : Promise<any> {
-        return fetch('http://localhost/api/' + url, {
+        return fetch('https://app.stage.naept.com/api/' + url, {
             headers: {
                 'Accept'            : 'application/json',
                 'Content-Type'      : 'application/json',
@@ -13,6 +15,10 @@ const NaeptApi = {
           let json = response.json()
           if (response.ok) {
             return json
+          // } else if (response.status === 401) {  // Unauthenticated
+          //   console.log("Pas connecté")
+            
+            // return setNav(NavOption.Settings)
           } else {
             return json.then(err => {throw err})
           }

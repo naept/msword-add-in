@@ -1,32 +1,42 @@
 import * as React from "react";
-import { connect } from 'react-redux'
 import { NavOption } from "../interfaces";
 import SettingsView from "./SettingsView";
 import ImportView from "./ImportView";
+import NavStore from "../store/NavStore";
 
-export interface Props {
-  currentNav: NavOption
+interface Props {
+  navStore: NavStore
 }
 
-export interface State {
+interface State {
+  currentNav: NavOption
 }
 
 class MainView extends React.Component<Props, State> {
 
+  // private store: NavStore = new NavStore()
+
   constructor(props: Props) {
     super(props);
-    this.state = {}
+    this.state = {
+      currentNav: this.props.navStore.nav
+    }
+    // On souscrit aux changements du store
+    this.props.navStore.onChange((store) => {
+      this.setState({ currentNav: store.nav })
+    })
   }
 
   componentDidMount() {
   }
 
   render() {
-    if (this.props.currentNav == NavOption.Settings) {
+    let {currentNav} = this.state
+    if (currentNav == NavOption.Settings) {
       return (
         <SettingsView/>
       )
-    } else if (this.props.currentNav == NavOption.Main) {
+    } else if (currentNav == NavOption.Main) {
       return (
         <ImportView/>
       )
@@ -38,8 +48,4 @@ class MainView extends React.Component<Props, State> {
   }
 }
 
-const mapStateToProps = ({nav}) => ({
-  currentNav: nav.nav
-})
-
-export default connect(mapStateToProps)(MainView)
+export default MainView
