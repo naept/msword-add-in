@@ -24,7 +24,7 @@ const render = Component => {
 /* Render application after Office initializes */
 Office.initialize = () => {
   isOfficeInitialized = true;
-  delete window.alert;       // assures alert works
+  delete window.alert; // assures alert works
 
   render(App);
 };

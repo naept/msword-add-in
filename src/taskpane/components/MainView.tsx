@@ -2,56 +2,48 @@ import * as React from "react";
 import { NavOption } from "../interfaces";
 import SettingsView from "./SettingsView";
 import ImportView from "./ImportView";
-import { NavContext } from "../context/NavContext"
+import { NavContext } from "../context/NavContext";
 import { MessageBar, MessageBarType } from "office-ui-fabric-react";
 
-interface Props {
-}
+interface Props {}
 
 interface State {
-  currentNav: NavOption
-  errorMessage: String
+  currentNav: NavOption;
+  errorMessage: String;
 }
 
 class MainView extends React.Component<Props, State> {
-  static contextType = NavContext
+  static contextType = NavContext;
 
   constructor(props: Props) {
-    super(props)
+    super(props);
     this.state = {
       currentNav: NavOption.Main,
       errorMessage: ""
-    }
+    };
   }
 
   componentDidMount() {
-    const navStore = this.context
+    const navStore = this.context;
     // On souscrit aux changements du store
-    navStore.onChange((store) => {
+    navStore.onChange(store => {
       this.setState({
         currentNav: store.nav,
         errorMessage: store.errorMessage
-      })
-    })
+      });
+    });
   }
 
   render() {
-    let {currentNav, errorMessage} = this.state
+    let { currentNav, errorMessage } = this.state;
 
     return (
       <div>
-        {errorMessage &&
-        <MessageBar messageBarType={MessageBarType.error}>
-          { errorMessage }
-        </MessageBar>
-        }
-        {currentNav === NavOption.Settings
-          ? <SettingsView/>
-          : <ImportView/>
-        }
+        {errorMessage && <MessageBar messageBarType={MessageBarType.error}>{errorMessage}</MessageBar>}
+        {currentNav === NavOption.Settings ? <SettingsView /> : <ImportView />}
       </div>
-    )
+    );
   }
 }
 
-export default MainView
+export default MainView;

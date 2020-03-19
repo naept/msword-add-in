@@ -2,23 +2,20 @@ import * as React from "react";
 import Progress from "./Progress";
 import CommandBar from "./CommandBar";
 import MainView from "./MainView";
-import { NavProvider } from "../context/NavContext"
+import { NavProvider } from "../context/NavContext";
 
 export interface AppProps {
   title: string;
   isOfficeInitialized: boolean;
-  token: string
+  token: string;
 }
 
-export interface AppState {
-}
+export interface AppState {}
 
 class App extends React.Component<AppProps, AppState> {
-
   constructor(props, context) {
-    super(props, context)
-    this.state = {
-    };
+    super(props, context);
+    this.state = {};
   }
 
   render() {
@@ -32,11 +29,11 @@ class App extends React.Component<AppProps, AppState> {
 
     return (
       <NavProvider>
-          <CommandBar/>
-          <MainView/>
+        <CommandBar />
+        <MainView />
       </NavProvider>
     );
   }
 }
 
-export default App
+export default App;
