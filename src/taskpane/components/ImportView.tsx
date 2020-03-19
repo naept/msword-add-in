@@ -1,6 +1,6 @@
 import * as React from "react";
 import NaeptApi from '../../naept/NaeptApi'
-import NavStore from '../store/NavStore'
+import { NavContext } from "../context/NavContext"
 import { NavOption } from "../interfaces";
 import ProjectStore from '../store/ProjectStore'
 import NewDocumentForm from './NewDocumentForm'
@@ -8,7 +8,6 @@ import { ComboBox, IComboBoxOption, Stack, Label, Spinner, SpinnerSize, Selectab
 import { Project, Document } from "../interfaces";
 
 interface Props {
-  navStore: NavStore
 }
 
 interface State {
@@ -21,11 +20,11 @@ interface State {
 }
 
 class ImportView extends React.Component<Props, State> {
+  static contextType = NavContext
   private projectStore: ProjectStore = new ProjectStore()
   private addProject: (project: Project) => void
   private clearDocuments: () => void
   private addDocument: (document: Document) => void
-  private setNav: (nav: NavOption, errorMessage: String) => void
 
   constructor(props: Props) {
     super(props);
@@ -43,7 +42,6 @@ class ImportView extends React.Component<Props, State> {
       loadingProjects: true,
       loadingDocuments: false,
     }
-    this.setNav = this.props.navStore.setNav.bind(this.props.navStore)
     
     // On souscrit aux changements du store
     this.projectStore.onChange((store) => {
@@ -94,7 +92,8 @@ class ImportView extends React.Component<Props, State> {
     })
     .catch((error) => {
       if (error.error === "Unauthenticated.") {
-        this.setNav(NavOption.Settings, "Authentication failed. Maybe your API key expired.")
+        const navStore = this.context
+        navStore.setNav(NavOption.Settings, "Authentication failed. Maybe your API key expired.")
       }
     })
   }

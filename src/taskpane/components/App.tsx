@@ -2,7 +2,7 @@ import * as React from "react";
 import Progress from "./Progress";
 import CommandBar from "./CommandBar";
 import MainView from "./MainView";
-import NavStore from '../store/NavStore'
+import { NavProvider } from "../context/NavContext"
 
 export interface AppProps {
   title: string;
@@ -14,10 +14,9 @@ export interface AppState {
 }
 
 class App extends React.Component<AppProps, AppState> {
-  private navStore: NavStore = new NavStore()
 
   constructor(props, context) {
-    super(props, context);
+    super(props, context)
     this.state = {
     };
   }
@@ -32,10 +31,10 @@ class App extends React.Component<AppProps, AppState> {
     }
 
     return (
-      <div>
-        <CommandBar navStore={this.navStore}/>
-        <MainView navStore={this.navStore}/>
-      </div>
+      <NavProvider>
+          <CommandBar/>
+          <MainView/>
+      </NavProvider>
     );
   }
 }

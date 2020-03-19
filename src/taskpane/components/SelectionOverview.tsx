@@ -30,29 +30,16 @@ export default class SelectionOverview extends React.Component<Props, State> {
     componentDidMount() {
         this.selection.onChange((selection) => {
             let value = selection.getSelectionHtml()
-                this.setState({
-                    currentSelection: value
-                })
-                this.props.onChange({
-                    target: {
-                        name: this.props.name,
-                        value: value,
-                    }
-                }, value)
+            this.setState({
+                currentSelection: value
+            })
+            this.props.onChange({
+                target: {
+                    name: this.props.name,
+                    value: value,
+                }
+            }, value)
         })
-        // Office.context.document.addHandlerAsync(Office.EventType.DocumentSelectionChanged, () => {  //event: Office.DocumentSelectionChangedEventArgs
-        //     this.selection.getSelectionHtml().then((value) => {
-        //         this.setState(() => ({
-        //             currentSelection: value
-        //         }))
-        //         this.props.onChange({
-        //             target: {
-        //                 name: this.props.name,
-        //                 value: value,
-        //             }
-        //         }, value)
-        //     })
-        // })
     }
     
     render() {
