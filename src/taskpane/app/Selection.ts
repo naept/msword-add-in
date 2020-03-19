@@ -1,19 +1,47 @@
-
+declare type ChangeCallback = (selection: Selection) => void
 export default class Selection {
     private selectionHtmlObject: HTMLDivElement = null
 
+    private callback: ChangeCallback = null
+
     constructor() {
         this.selectionHtmlObject = document.createElement('div')
+        
+        Office.context.document.addHandlerAsync(Office.EventType.DocumentSelectionChanged, () => {  //event: Office.DocumentSelectionChangedEventArgs
+            this.handleSelectionChange()
+        })
+
+        this.handleSelectionChange()
+    }
+
+    /**
+     * Informe les écouteurs d'un changement de selection
+     * */
+    inform () {
+        this.callback(this)
+    }
+
+    /**
+     * Permet d'ajouter un écouteur
+     * */
+    onChange (cb: ChangeCallback) {
+        this.callback = cb
+        this.inform()
     }
 
     getSelectionHtml() {
+        return this.selectionHtmlObject.innerHTML
+    }
+
+    handleSelectionChange() {
         return Word.run((context) => {
             let selection = context.document.getSelection().getHtml()
         
             return context.sync().then(() => {
-              this.selectionHtmlObject.innerHTML = selection.value
-              this.cleanHtmlElement()
-              return this.selectionHtmlObject.innerHTML
+            this.selectionHtmlObject.innerHTML = selection.value
+            this.cleanHtmlElement()
+            console.log("Selection changed", this.selectionHtmlObject.innerHTML)
+            this.inform()
             })
         })
     }
