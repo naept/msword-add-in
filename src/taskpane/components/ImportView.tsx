@@ -3,8 +3,8 @@ import NaeptApi from '../../naept/NaeptApi'
 import NavStore from '../store/NavStore'
 import { NavOption } from "../interfaces";
 import ProjectStore from '../store/ProjectStore'
-import Selection from '../app/Selection'
-import { ComboBox, IComboBoxOption, Stack, Label, Spinner, SpinnerSize, SelectableOptionMenuItemType, TextField } from "office-ui-fabric-react";
+import NewDocumentForm from './NewDocumentForm'
+import { ComboBox, IComboBoxOption, Stack, Label, Spinner, SpinnerSize, SelectableOptionMenuItemType } from "office-ui-fabric-react";
 import { Project, Document } from "../interfaces";
 
 interface Props {
@@ -12,35 +12,26 @@ interface Props {
 }
 
 interface State {
-  fileName: string
   projectsOptions : IComboBoxOption[]
   documentsOptions : IComboBoxOption[]
-  currentSelection: string
   project: Project
   document: Document
   loadingProjects: boolean
   loadingDocuments: boolean
 }
 
-const selectionDivStyle = {
-  backgroundColor: 'white',
-  border: '1px grey solid',
-};
 class ImportView extends React.Component<Props, State> {
   private projectStore: ProjectStore = new ProjectStore()
   private addProject: (project: Project) => void
   private clearDocuments: () => void
   private addDocument: (document: Document) => void
   private setNav: (nav: NavOption, errorMessage: String) => void
-  private selection: Selection = new Selection()
 
   constructor(props: Props) {
     super(props);
     this.state = {
-      fileName: '',
       projectsOptions: [],
       documentsOptions: [],
-      currentSelection: '',
       project: {
         id: '',
         name: ''
@@ -95,22 +86,6 @@ class ImportView extends React.Component<Props, State> {
   }
 
   componentDidMount() {
-    Office.context.document.getFilePropertiesAsync((asyncResult) => {
-      let url = decodeURIComponent(asyncResult.value.url)
-      let fileName = url.match(/.*[\\\/](.+?)\./)[1]
-      this.setState(() => ({
-        fileName: fileName
-      }))
-    })
-
-    Office.context.document.addHandlerAsync(Office.EventType.DocumentSelectionChanged, () => {  //event: Office.DocumentSelectionChangedEventArgs
-      this.selection.getSelectionHtml().then((value) => {
-        this.setState(() => ({
-          currentSelection: value
-        }))
-      })
-    })
-
     this.loadUserProjects()
     .then(() => {
       this.setState(() => ({
@@ -185,21 +160,6 @@ class ImportView extends React.Component<Props, State> {
     }
   }
 
-  renderNewDocumentForm = () => {
-    if (this.state.document.id == 'addNewDocument') {
-      return (
-        <Stack>
-          <TextField label="Document name" defaultValue={this.state.fileName}/>
-          <TextField label="Document description" readOnly multiline rows={8} value={this.state.currentSelection}/>
-          <Label>Document description</Label>
-          <div style={selectionDivStyle} dangerouslySetInnerHTML={{ __html: this.state.currentSelection }} />
-        </Stack>
-      )
-    } else {
-      return null
-    }
-  }
-
   render() {
     return (
       <section>
@@ -225,7 +185,7 @@ class ImportView extends React.Component<Props, State> {
           disabled={this.state.project.name == '' || this.state.loadingDocuments}
         />
 
-        <this.renderNewDocumentForm/>
+        {this.state.document.id === 'addNewDocument' && <NewDocumentForm/>}
       </section>
     )
   }

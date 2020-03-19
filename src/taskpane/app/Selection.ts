@@ -26,6 +26,7 @@ export default class Selection {
         this.removeAllTags("span", false)
         this.removeAllTags("div", false)
         this.removeAllCarriageReturns()
+        this.trim()
     }
     
     removeAllTagAttributes() {
@@ -55,12 +56,16 @@ export default class Selection {
         this.selectionHtmlObject.innerHTML = this.selectionHtmlObject.innerHTML.replace(openTag, "").replace(closeTag, "")
     }
 
-    removeAllCarriageReturns() {
-        this.selectionHtmlObject.innerHTML = this.selectionHtmlObject.innerHTML.replace(/\n/g, "")
+    removeAllCarriageReturns() { // Only the ones after a tag
+        this.selectionHtmlObject.innerHTML = this.selectionHtmlObject.innerHTML.replace(/>\n/g, ">")
     }
 
     removeAllNonBreakableSpaces() {
         this.selectionHtmlObject.innerHTML = this.selectionHtmlObject.innerHTML.replace(/&nbsp;/g, "")
+    }
+
+    trim() {
+        this.selectionHtmlObject.innerHTML = this.selectionHtmlObject.innerHTML.trim()
     }
 
 }
