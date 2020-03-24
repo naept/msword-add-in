@@ -1,6 +1,6 @@
 import * as React from "react";
 import { GlobalContext } from "../context/GlobalContext";
-import { NavOption, ElementLocation } from "../interfaces";
+import { NavOption, ElementLocation, Category } from "../interfaces";
 import {
   // ComboBox,
   // IComboBoxOption,
@@ -23,10 +23,11 @@ interface Props {
 interface State {
   projectsOptions: IDropdownOption[];
   documentsOptions: IDropdownOption[];
-  project: Project;
-  document: Document;
+  categoriesOptions: IDropdownOption[];
+  elementLocation: ElementLocation;
   loadingProjects: boolean;
   loadingDocuments: boolean;
+  loadingCategories: boolean;
 }
 
 export default class ElementSelector extends React.Component<Props, State> {
@@ -37,18 +38,16 @@ export default class ElementSelector extends React.Component<Props, State> {
     this.state = {
       projectsOptions: [],
       documentsOptions: [],
-      project: {
-        id: "",
-        name: ""
-      },
-      document: {
-        id: "",
-        project_id: "",
-        name: "",
-        description: ""
+      categoriesOptions: [],
+      elementLocation: {
+        projectId: "",
+        documentId: "",
+        categoryId: "",
+        requirementId: ""
       },
       loadingProjects: false,
-      loadingDocuments: false
+      loadingDocuments: false,
+      loadingCategories: false
     };
   }
 
@@ -83,6 +82,26 @@ export default class ElementSelector extends React.Component<Props, State> {
               text: "Add new document",
               itemType: SelectableOptionMenuItemType.Normal
             }
+          ]),
+        categoriesOptions: Object.values(store.getAccessibleCategories())
+          .map((category: Category) => {
+            return {
+              key: category.id,
+              text: category.name,
+              itemType: SelectableOptionMenuItemType.Normal
+            };
+          })
+          .concat([
+            {
+              key: "divider",
+              text: "-",
+              itemType: SelectableOptionMenuItemType.Divider
+            },
+            {
+              key: "addNewCategory",
+              text: "Add new category",
+              itemType: SelectableOptionMenuItemType.Normal
+            }
           ])
       });
     });
@@ -107,37 +126,34 @@ export default class ElementSelector extends React.Component<Props, State> {
     });
   }
 
-  loadProjectDocuments(project_id: string) {
+  loadProjectStructure(project_id: string) {
     const projectStore: ProjectStore = this.context.projectStore;
     this.setState(() => ({
-      loadingDocuments: true
+      loadingDocuments: true,
+      loadingCategories: true
     }));
-    return projectStore.loadProjectDocumentsAsync(project_id).then(() => {
+    return projectStore.loadProjectStructureAsync(project_id).then(() => {
       this.setState(() => ({
-        loadingDocuments: false
+        loadingDocuments: false,
+        loadingCategories: false
       }));
     });
   }
 
   handleProjectSelectChange = (event: React.FormEvent<HTMLDivElement>, item: IDropdownOption) => {
     if (event) {
+      const projectStore: ProjectStore = this.context.projectStore;
       this.setState(
-        state => ({
-          project: {
-            ...state.project,
-            id: item.key.toString(),
-            name: item.text
-          },
-          document: {
-            ...state.document,
-            id: "",
-            name: ""
+        {
+          elementLocation: {
+            ...projectStore.selectedElementLocation,
+            projectId: item.key.toString()
           }
-        }),
+        },
         () => this.notifyChange()
       );
 
-      this.loadProjectDocuments(item.key.toString()).catch(error => {
+      this.loadProjectStructure(item.key.toString()).catch(error => {
         console.error(error);
       });
     }
@@ -145,14 +161,29 @@ export default class ElementSelector extends React.Component<Props, State> {
 
   handleDocumentSelectChange = (event: React.FormEvent<HTMLDivElement>, item: IDropdownOption) => {
     if (event) {
+      const projectStore: ProjectStore = this.context.projectStore;
       this.setState(
-        state => ({
-          document: {
-            ...state.document,
-            id: item.key.toString(),
-            name: item.text
+        {
+          elementLocation: {
+            ...projectStore.selectedElementLocation,
+            documentId: item.key.toString()
           }
-        }),
+        },
+        () => this.notifyChange()
+      );
+    }
+  };
+
+  handleCategorySelectChange = (event: React.FormEvent<HTMLDivElement>, item: IDropdownOption) => {
+    if (event) {
+      const projectStore: ProjectStore = this.context.projectStore;
+      this.setState(
+        {
+          elementLocation: {
+            ...projectStore.selectedElementLocation,
+            categoryId: item.key.toString()
+          }
+        },
         () => this.notifyChange()
       );
     }
@@ -161,9 +192,9 @@ export default class ElementSelector extends React.Component<Props, State> {
   notifyChange() {
     const projectStore: ProjectStore = this.context.projectStore;
     projectStore.setSelectedElementLocation({
-      projectId: this.state.project.id,
-      documentId: this.state.document.id,
-      categoryId: "",
+      projectId: this.state.elementLocation.projectId,
+      documentId: this.state.elementLocation.documentId,
+      categoryId: this.state.elementLocation.categoryId,
       requirementId: ""
     });
   }
@@ -192,7 +223,23 @@ export default class ElementSelector extends React.Component<Props, State> {
           options={this.state.documentsOptions}
           onChange={this.handleDocumentSelectChange}
           selectedKey={projectStore.selectedElementLocation.documentId}
-          disabled={this.state.project.name == "" || this.state.loadingDocuments}
+          disabled={projectStore.selectedElementLocation.projectId === "" || this.state.loadingDocuments}
+          responsiveMode={ResponsiveMode.large}
+        />
+
+        <Stack horizontal={true} verticalAlign="center" tokens={{ childrenGap: 10 }}>
+          <Label>Select a category</Label>
+          {this.state.loadingCategories && <Spinner size={SpinnerSize.xSmall} />}
+        </Stack>
+        <Dropdown
+          options={this.state.categoriesOptions}
+          onChange={this.handleCategorySelectChange}
+          selectedKey={projectStore.selectedElementLocation.categoryId}
+          disabled={
+            projectStore.selectedElementLocation.documentId === "" ||
+            projectStore.selectedElementLocation.documentId === "addNewDocument" ||
+            this.state.loadingCategories
+          }
           responsiveMode={ResponsiveMode.large}
         />
       </section>

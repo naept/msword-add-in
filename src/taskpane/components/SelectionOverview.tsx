@@ -1,7 +1,7 @@
 import * as React from "react";
 import Selection from "../app/Selection";
-import { Stack, Label, TextField } from "office-ui-fabric-react";
-// import { Stack, Label } from "office-ui-fabric-react";
+// import { Stack, Label, TextField } from "office-ui-fabric-react";
+import { Stack, Label } from "office-ui-fabric-react";
 
 interface Props {
   label?: string;
@@ -57,7 +57,7 @@ export default class SelectionOverview extends React.Component<Props, State> {
       <Stack>
         {this.props.label && <Label>{this.props.label}</Label>}
         <div style={selectionDivStyle} dangerouslySetInnerHTML={{ __html: this.state.currentSelection }} />
-        <TextField label="Html :" readOnly multiline rows={8} value={this.state.currentSelection} />
+        {/* <TextField label="Html :" readOnly multiline rows={8} value={this.state.currentSelection} /> */}
       </Stack>
     );
   }

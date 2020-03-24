@@ -4,9 +4,7 @@ import SelectionOverview from "./SelectionOverview";
 import { Stack, TextField, PrimaryButton, Spinner, SpinnerSize } from "office-ui-fabric-react";
 import ProjectStore from "../store/ProjectStore";
 
-interface Props {
-  project_id: string;
-}
+interface Props {}
 
 interface State {
   documentName: string;
@@ -60,7 +58,7 @@ export default class NewDocumentForm extends React.Component<Props, State> {
     return projectStore
       .createDocumentAsync({
         id: null,
-        project_id: this.props.project_id,
+        project_id: projectStore.selectedElementLocation.projectId,
         name: this.state.documentName,
         description: this.state.documentDescription
       })
@@ -74,6 +72,7 @@ export default class NewDocumentForm extends React.Component<Props, State> {
   render() {
     return (
       <Stack>
+        <h2>New Document</h2>
         <TextField label="Document name" value={this.state.documentName} onChange={this.handleDocumentNameChange} />
         <SelectionOverview label="Document description" onChange={this.handleDocumentDescriptionChange} />
         <PrimaryButton onClick={this.createDocument}>

@@ -4,6 +4,7 @@ import NewDocumentForm from "./NewDocumentForm";
 import { ElementLocation } from "../interfaces";
 import ProjectStore from "../store/ProjectStore";
 import { GlobalContext } from "../context/GlobalContext";
+import NewCategoryForm from "./NewCategoryForm";
 
 interface Props {}
 
@@ -40,7 +41,8 @@ export default class ImportView extends React.Component<Props, State> {
     return (
       <section>
         <ElementSelector />
-        {this.state.selectedElementLocation.documentId === "addNewDocument" && <NewDocumentForm project_id={this.state.selectedElementLocation.projectId}/>}
+        {this.state.selectedElementLocation.documentId === "addNewDocument" && <NewDocumentForm />}
+        {this.state.selectedElementLocation.categoryId === "addNewCategory" && <NewCategoryForm />}
       </section>
     );
   }
