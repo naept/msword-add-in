@@ -1,11 +1,17 @@
 import NaeptApi from "../../naept/NaeptApi";
-import { Project, Document } from "../interfaces";
+import { Project, Document, ElementLocation } from "../interfaces";
 
 declare type ChangeCallback = (store: ProjectStore) => void;
 
 export default class ProjectStore {
   public projects: {} = {};
   public documents: {} = {};
+  public selectedElementLocation: ElementLocation = {
+    projectId: "",
+    documentId: "",
+    categoryId: "",
+    requirementId: ""
+  };
 
   private callbacks: ChangeCallback[] = [];
 
@@ -43,7 +49,26 @@ export default class ProjectStore {
     return NaeptApi.fetchNaeptApi("documents", {
       method: 'POST',
       body: JSON.stringify(document)
+    }).then((response) => {
+      let document: Document = response.data
+      this.addDocument(document)
+      this.setSelectedDocumentLocation(document.id)
     })
+  }
+
+  setSelectedElementLocation(elementLocation: ElementLocation) {
+    this.selectedElementLocation = {
+      projectId: elementLocation.projectId,
+      documentId: elementLocation.documentId,
+      categoryId: elementLocation.categoryId,
+      requirementId: elementLocation.requirementId
+    }
+    this.inform();
+  }
+
+  private setSelectedDocumentLocation(document_id: string) {
+    this.selectedElementLocation.documentId = document_id
+    this.inform();
   }
 
   private addProject(project: Project) {

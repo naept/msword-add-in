@@ -1,7 +1,8 @@
 import * as React from "react";
 import { GlobalContext } from "../context/GlobalContext";
 import SelectionOverview from "./SelectionOverview";
-import { Stack, TextField, PrimaryButton } from "office-ui-fabric-react";
+import { Stack, TextField, PrimaryButton, Spinner, SpinnerSize } from "office-ui-fabric-react";
+import ProjectStore from "../store/ProjectStore";
 
 interface Props {
   project_id: string;
@@ -10,6 +11,7 @@ interface Props {
 interface State {
   documentName: string;
   documentDescription: string;
+  creatingDocument: boolean;
 }
 
 export default class NewDocumentForm extends React.Component<Props, State> {
@@ -19,7 +21,8 @@ export default class NewDocumentForm extends React.Component<Props, State> {
     super(props);
     this.state = {
       documentName: "",
-      documentDescription: ""
+      documentDescription: "",
+      creatingDocument: false
     };
   }
 
@@ -50,20 +53,22 @@ export default class NewDocumentForm extends React.Component<Props, State> {
   };
 
   createDocument = () => {
-    const projectStore = this.context.projectStore;
-    return projectStore.createDocumentAsync({
-      project_id: this.props.project_id,
-      name: this.state.documentName,
-      description: this.state.documentDescription
+    const projectStore: ProjectStore = this.context.projectStore;
+    this.setState({
+      creatingDocument: true
     });
-    // return NaeptApi.fetchNaeptApi("documents", {
-    //   method: 'POST',
-    //   body: JSON.stringify({
-    //       project_id: this.props.project_id,
-    //       name: this.state.documentName,
-    //       description: this.state.documentDescription,
-    //   })
-    // })
+    return projectStore
+      .createDocumentAsync({
+        id: null,
+        project_id: this.props.project_id,
+        name: this.state.documentName,
+        description: this.state.documentDescription
+      })
+      .then(() => {
+        this.setState({
+          creatingDocument: true
+        });
+      });
   };
 
   render() {
@@ -71,7 +76,10 @@ export default class NewDocumentForm extends React.Component<Props, State> {
       <Stack>
         <TextField label="Document name" value={this.state.documentName} onChange={this.handleDocumentNameChange} />
         <SelectionOverview label="Document description" onChange={this.handleDocumentDescriptionChange} />
-        <PrimaryButton text="Create document" onClick={this.createDocument} />
+        <PrimaryButton onClick={this.createDocument}>
+          Create document
+          {this.state.creatingDocument && <Spinner size={SpinnerSize.xSmall} style={{ marginLeft: "5px" }} />}
+        </PrimaryButton>
       </Stack>
     );
   }

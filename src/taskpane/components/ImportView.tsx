@@ -2,6 +2,8 @@ import * as React from "react";
 import ElementSelector from "./ElementSelector";
 import NewDocumentForm from "./NewDocumentForm";
 import { ElementLocation } from "../interfaces";
+import ProjectStore from "../store/ProjectStore";
+import { GlobalContext } from "../context/GlobalContext";
 
 interface Props {}
 
@@ -10,6 +12,8 @@ interface State {
 }
 
 export default class ImportView extends React.Component<Props, State> {
+  static contextType = GlobalContext;
+
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -21,17 +25,21 @@ export default class ImportView extends React.Component<Props, State> {
       }
     };
   }
-
-  handleElementSelectChange = value => {
-    this.setState(() => ({
-      selectedElementLocation: value
-    }));
-  };
+  
+  componentDidMount() {
+    // On souscrit aux changements du projectStore
+    const projectStore: ProjectStore = this.context.projectStore;
+    projectStore.onChange(store => {
+      this.setState({
+        selectedElementLocation: store.selectedElementLocation
+      })
+    });
+  }
 
   render() {
     return (
       <section>
-        <ElementSelector onChange={this.handleElementSelectChange} />
+        <ElementSelector />
         {this.state.selectedElementLocation.documentId === "addNewDocument" && <NewDocumentForm project_id={this.state.selectedElementLocation.projectId}/>}
       </section>
     );

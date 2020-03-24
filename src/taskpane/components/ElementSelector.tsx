@@ -2,23 +2,27 @@ import * as React from "react";
 import { GlobalContext } from "../context/GlobalContext";
 import { NavOption, ElementLocation } from "../interfaces";
 import {
-  ComboBox,
-  IComboBoxOption,
+  // ComboBox,
+  // IComboBoxOption,
   Stack,
   Label,
   Spinner,
   SpinnerSize,
-  SelectableOptionMenuItemType
+  SelectableOptionMenuItemType,
+  Dropdown,
+  IDropdownOption,
+  ResponsiveMode
 } from "office-ui-fabric-react";
 import { Project, Document } from "../interfaces";
+import ProjectStore from "../store/ProjectStore";
 
 interface Props {
   onChange?: (newValue: ElementLocation) => void;
 }
 
 interface State {
-  projectsOptions: IComboBoxOption[];
-  documentsOptions: IComboBoxOption[];
+  projectsOptions: IDropdownOption[];
+  documentsOptions: IDropdownOption[];
   project: Project;
   document: Document;
   loadingProjects: boolean;
@@ -50,7 +54,7 @@ export default class ElementSelector extends React.Component<Props, State> {
 
   componentDidMount() {
     // On souscrit aux changements du projectStore
-    const projectStore = this.context.projectStore;
+    const projectStore: ProjectStore = this.context.projectStore;
     projectStore.onChange(store => {
       this.setState({
         projectsOptions: Object.values(store.projects).map((project: Project) => {
@@ -92,7 +96,7 @@ export default class ElementSelector extends React.Component<Props, State> {
   }
 
   loadUserProjects() {
-    const projectStore = this.context.projectStore;
+    const projectStore: ProjectStore = this.context.projectStore;
     this.setState(() => ({
       loadingProjects: true
     }));
@@ -103,8 +107,8 @@ export default class ElementSelector extends React.Component<Props, State> {
     });
   }
 
-  loadProjectDocuments(project_id: String) {
-    const projectStore = this.context.projectStore;
+  loadProjectDocuments(project_id: string) {
+    const projectStore: ProjectStore = this.context.projectStore;
     this.setState(() => ({
       loadingDocuments: true
     }));
@@ -115,14 +119,14 @@ export default class ElementSelector extends React.Component<Props, State> {
     });
   }
 
-  handleProjectSelectChange = (event, option) => {
+  handleProjectSelectChange = (event: React.FormEvent<HTMLDivElement>, item: IDropdownOption) => {
     if (event) {
       this.setState(
         state => ({
           project: {
             ...state.project,
-            id: option.key,
-            name: option.text
+            id: item.key.toString(),
+            name: item.text
           },
           document: {
             ...state.document,
@@ -133,20 +137,20 @@ export default class ElementSelector extends React.Component<Props, State> {
         () => this.notifyChange()
       );
 
-      this.loadProjectDocuments(option.key).catch(error => {
+      this.loadProjectDocuments(item.key.toString()).catch(error => {
         console.error(error);
       });
     }
   };
 
-  handleDocumentSelectChange = (event, option) => {
+  handleDocumentSelectChange = (event: React.FormEvent<HTMLDivElement>, item: IDropdownOption) => {
     if (event) {
       this.setState(
         state => ({
           document: {
             ...state.document,
-            id: option.key,
-            name: option.text
+            id: item.key.toString(),
+            name: item.text
           }
         }),
         () => this.notifyChange()
@@ -155,7 +159,8 @@ export default class ElementSelector extends React.Component<Props, State> {
   };
 
   notifyChange() {
-    this.props.onChange({
+    const projectStore: ProjectStore = this.context.projectStore;
+    projectStore.setSelectedElementLocation({
       projectId: this.state.project.id,
       documentId: this.state.document.id,
       categoryId: "",
@@ -164,28 +169,31 @@ export default class ElementSelector extends React.Component<Props, State> {
   }
 
   render() {
+    const projectStore: ProjectStore = this.context.projectStore;
     return (
       <section>
         <Stack horizontal={true} verticalAlign="center" tokens={{ childrenGap: 10 }}>
           <Label>Select a project</Label>
           {this.state.loadingProjects && <Spinner size={SpinnerSize.xSmall} />}
         </Stack>
-        <ComboBox
+        <Dropdown
           options={this.state.projectsOptions}
           onChange={this.handleProjectSelectChange}
-          text={this.state.project.name}
+          selectedKey={projectStore.selectedElementLocation.projectId}
           disabled={this.state.loadingProjects}
+          responsiveMode={ResponsiveMode.large}
         />
 
         <Stack horizontal={true} verticalAlign="center" tokens={{ childrenGap: 10 }}>
           <Label>Select a document</Label>
           {this.state.loadingDocuments && <Spinner size={SpinnerSize.xSmall} />}
         </Stack>
-        <ComboBox
+        <Dropdown
           options={this.state.documentsOptions}
           onChange={this.handleDocumentSelectChange}
-          text={this.state.document.name}
+          selectedKey={projectStore.selectedElementLocation.documentId}
           disabled={this.state.project.name == "" || this.state.loadingDocuments}
+          responsiveMode={ResponsiveMode.large}
         />
       </section>
     );
