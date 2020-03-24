@@ -23,7 +23,6 @@ export default class ImportView extends React.Component<Props, State> {
   }
 
   handleElementSelectChange = value => {
-    console.log("handleElementSelectChange", value)
     this.setState(() => ({
       selectedElementLocation: value
     }));
@@ -33,7 +32,7 @@ export default class ImportView extends React.Component<Props, State> {
     return (
       <section>
         <ElementSelector onChange={this.handleElementSelectChange} />
-        {this.state.selectedElementLocation.documentId === "addNewDocument" && <NewDocumentForm />}
+        {this.state.selectedElementLocation.documentId === "addNewDocument" && <NewDocumentForm project_id={this.state.selectedElementLocation.projectId}/>}
       </section>
     );
   }

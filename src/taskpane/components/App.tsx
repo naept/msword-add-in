@@ -2,7 +2,7 @@ import * as React from "react";
 import Progress from "./Progress";
 import CommandBar from "./CommandBar";
 import MainView from "./MainView";
-import { NavProvider } from "../context/NavContext";
+import { GlobalProvider } from "../context/GlobalContext";
 
 export interface AppProps {
   title: string;
@@ -28,10 +28,10 @@ class App extends React.Component<AppProps, AppState> {
     }
 
     return (
-      <NavProvider>
+      <GlobalProvider>
         <CommandBar />
         <MainView />
-      </NavProvider>
+      </GlobalProvider>
     );
   }
 }

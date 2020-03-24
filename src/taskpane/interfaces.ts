@@ -10,7 +10,9 @@ export interface Project {
 
 export interface Document {
   id: string;
+  project_id: string;
   name: string;
+  description: string;
 }
 
 export interface User {

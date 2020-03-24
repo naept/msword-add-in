@@ -2,7 +2,8 @@
 const NaeptApi = {
 
     fetchNaeptApi(url: string, options: object = {}) : Promise<any> {
-        return fetch('https://app.stage.naept.com/api/' + url, {
+        // return fetch('https://app.stage.naept.com/api/' + url, {
+        return fetch('http://localhost/api/' + url, {
             headers: {
                 'Accept'            : 'application/json',
                 'Content-Type'      : 'application/json',
@@ -19,16 +20,6 @@ const NaeptApi = {
           }
         })
     },
-
-    // getSelection() {
-    //   Word.run((context) => {
-    //     let selection = context.document.getSelection().getHtml()
-
-    //     return context.sync().then(() => {
-    //       return selection
-    //     })
-    //   })
-    // }
 }
 
 export default NaeptApi

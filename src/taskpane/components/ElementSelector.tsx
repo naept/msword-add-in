@@ -1,8 +1,6 @@
 import * as React from "react";
-import NaeptApi from "../../naept/NaeptApi";
-import { NavContext } from "../context/NavContext";
+import { GlobalContext } from "../context/GlobalContext";
 import { NavOption, ElementLocation } from "../interfaces";
-import ProjectStore from "../store/ProjectStore";
 import {
   ComboBox,
   IComboBoxOption,
@@ -28,11 +26,7 @@ interface State {
 }
 
 export default class ElementSelector extends React.Component<Props, State> {
-  static contextType = NavContext;
-  private projectStore: ProjectStore = new ProjectStore();
-  private addProject: (project: Project) => void;
-  private clearDocuments: () => void;
-  private addDocument: (document: Document) => void;
+  static contextType = GlobalContext;
 
   constructor(props: Props) {
     super(props);
@@ -45,14 +39,19 @@ export default class ElementSelector extends React.Component<Props, State> {
       },
       document: {
         id: "",
-        name: ""
+        project_id: "",
+        name: "",
+        description: ""
       },
       loadingProjects: false,
       loadingDocuments: false
     };
+  }
 
-    // On souscrit aux changements du store
-    this.projectStore.onChange(store => {
+  componentDidMount() {
+    // On souscrit aux changements du projectStore
+    const projectStore = this.context.projectStore;
+    projectStore.onChange(store => {
       this.setState({
         projectsOptions: Object.values(store.projects).map((project: Project) => {
           return {
@@ -84,28 +83,20 @@ export default class ElementSelector extends React.Component<Props, State> {
       });
     });
 
-    // On injecte les méthodes du store en méthode du composant
-    this.addProject = this.projectStore.addProject.bind(this.projectStore);
-    this.clearDocuments = this.projectStore.clearDocuments.bind(this.projectStore);
-    this.addDocument = this.projectStore.addDocument.bind(this.projectStore);
-  }
-
-  componentDidMount() {
     this.loadUserProjects().catch(error => {
       if (error.error === "Unauthenticated.") {
-        const navStore = this.context;
+        const navStore = this.context.navStore;
         navStore.setNav(NavOption.Settings, "Authentication failed. Maybe your API key expired.");
       }
     });
   }
 
   loadUserProjects() {
+    const projectStore = this.context.projectStore;
     this.setState(() => ({
       loadingProjects: true
     }));
-    return NaeptApi.fetchNaeptApi("user/projects").then(response => {
-      let projects = response.data;
-      projects.forEach((project: Project) => this.addProject(project));
+    return projectStore.loadUserProjectsAsync().then(() => {
       this.setState(() => ({
         loadingProjects: false
       }));
@@ -113,13 +104,11 @@ export default class ElementSelector extends React.Component<Props, State> {
   }
 
   loadProjectDocuments(project_id: String) {
+    const projectStore = this.context.projectStore;
     this.setState(() => ({
       loadingDocuments: true
     }));
-    return NaeptApi.fetchNaeptApi("projects/documents/" + project_id).then(response => {
-      this.clearDocuments();
-      let projects = response.data;
-      projects.forEach((document: Document) => this.addDocument(document));
+    return projectStore.loadProjectDocumentsAsync(project_id).then(() => {
       this.setState(() => ({
         loadingDocuments: false
       }));

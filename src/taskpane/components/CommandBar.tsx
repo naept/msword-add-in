@@ -1,5 +1,5 @@
 import * as React from "react";
-import { NavContext } from "../context/NavContext";
+import { GlobalContext } from "../context/GlobalContext";
 import { NavOption } from "../interfaces";
 import { CommandBar as CommandBarBase, ICommandBarItemProps } from "office-ui-fabric-react";
 
@@ -8,7 +8,7 @@ export interface Props {}
 export interface State {}
 
 class CommandBar extends React.Component<Props, State> {
-  static contextType = NavContext;
+  static contextType = GlobalContext;
 
   constructor(props: Props) {
     super(props);
@@ -23,7 +23,7 @@ class CommandBar extends React.Component<Props, State> {
       iconOnly: true,
       iconProps: { iconName: "Settings" },
       onClick: () => {
-        const navStore = this.context;
+        const navStore = this.context.navStore;
         navStore.setNav(NavOption.Settings);
       }
     }
@@ -36,7 +36,7 @@ class CommandBar extends React.Component<Props, State> {
       ariaLabel: "Home",
       iconProps: { iconName: "Home" },
       onClick: () => {
-        const navStore = this.context;
+        const navStore = this.context.navStore;
         navStore.setNav(NavOption.Main);
       }
     }

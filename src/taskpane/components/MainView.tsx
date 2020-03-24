@@ -2,7 +2,7 @@ import * as React from "react";
 import { NavOption } from "../interfaces";
 import SettingsView from "./SettingsView";
 import ImportView from "./ImportView";
-import { NavContext } from "../context/NavContext";
+import { GlobalContext } from "../context/GlobalContext";
 import { MessageBar, MessageBarType } from "office-ui-fabric-react";
 
 interface Props {}
@@ -13,7 +13,7 @@ interface State {
 }
 
 class MainView extends React.Component<Props, State> {
-  static contextType = NavContext;
+  static contextType = GlobalContext;
 
   constructor(props: Props) {
     super(props);
@@ -24,7 +24,7 @@ class MainView extends React.Component<Props, State> {
   }
 
   componentDidMount() {
-    const navStore = this.context;
+    const navStore = this.context.navStore;
     // On souscrit aux changements du store
     navStore.onChange(store => {
       this.setState({

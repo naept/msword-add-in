@@ -40,7 +40,6 @@ export default class Selection {
       return context.sync().then(() => {
         this.selectionHtmlObject.innerHTML = selection.value;
         this.cleanHtmlElement();
-        console.log("Selection changed", this.selectionHtmlObject.innerHTML);
         this.inform();
       });
     });
