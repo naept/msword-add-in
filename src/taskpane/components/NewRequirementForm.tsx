@@ -1,6 +1,6 @@
 import * as React from "react";
 import { GlobalContext } from "../context/GlobalContext";
-import { Stack, TextField, PrimaryButton, Spinner, SpinnerSize, Toggle } from "office-ui-fabric-react";
+import { Stack, TextField, PrimaryButton, Spinner, SpinnerSize, Toggle, MessageBar, MessageBarType } from "office-ui-fabric-react";
 import ProjectStore from "../store/ProjectStore";
 import Selection from "../app/Selection";
 import DisplayHtml from "./DisplayHtml";
@@ -12,6 +12,7 @@ interface State {
   requirementName: string;
   requirementDescription: string;
   creatingRequirement: boolean;
+  displaySuccessMessageBar: boolean;
   errors: {};
 }
 
@@ -26,6 +27,7 @@ export default class NewRequirementForm extends React.Component<Props, State> {
       requirementName: "",
       requirementDescription: "",
       creatingRequirement: false,
+      displaySuccessMessageBar: false,
       errors: {}
     };
   }
@@ -47,7 +49,9 @@ export default class NewRequirementForm extends React.Component<Props, State> {
     if (event) {
       this.setState(
         () => ({
-          autoRequirementName: checked
+          autoRequirementName: checked,
+          displaySuccessMessageBar: false,
+          errors: {}
         }),
         () => {
           const selection: Selection = this.context.selection;
@@ -60,7 +64,9 @@ export default class NewRequirementForm extends React.Component<Props, State> {
   handleRequirementNameChange = (event, value) => {
     if (event) {
       this.setState(() => ({
-        requirementName: value
+        requirementName: value,
+        displaySuccessMessageBar: false,
+        errors: {}
       }));
     }
   };
@@ -72,20 +78,29 @@ export default class NewRequirementForm extends React.Component<Props, State> {
         : this.state.requirementName,
       requirementDescription: this.state.autoRequirementName
         ? selection.getSelectionLastParagraphsHtml()
-        : selection.getSelectionHtml()
+        : selection.getSelectionHtml(),
+      displaySuccessMessageBar: false,
+      errors: {}
     }));
   };
 
   createDocument = () => {
     const projectStore: ProjectStore = this.context.projectStore;
     this.setState({
-      creatingRequirement: true
+      creatingRequirement: true,
+      displaySuccessMessageBar: false,
+      errors: {}
     });
     return projectStore
       .createRequirementAsync({
         category_id: projectStore.selectedElementLocation.categoryId,
         name: this.state.requirementName,
         description: this.state.requirementDescription
+      })
+      .then(() => {
+        this.setState(() => ({
+          displaySuccessMessageBar: true
+        }));
       })
       .catch(error => {
         this.setState(() => ({
@@ -104,6 +119,7 @@ export default class NewRequirementForm extends React.Component<Props, State> {
     return (
       <Stack>
         <h2>New Requirement</h2>
+        {this.state.displaySuccessMessageBar && <MessageBar messageBarType={MessageBarType.success} >Requirement successfully created</MessageBar>}
         <Toggle
           label="First paragraph is the title"
           checked={this.state.autoRequirementName}
