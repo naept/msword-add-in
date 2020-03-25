@@ -1,8 +1,9 @@
 import * as React from "react";
 import { GlobalContext } from "../context/GlobalContext";
-import SelectionOverview from "./SelectionOverview";
 import { Stack, TextField, PrimaryButton, Spinner, SpinnerSize } from "office-ui-fabric-react";
 import ProjectStore from "../store/ProjectStore";
+import Selection from "../app/Selection";
+import DisplayHtml from "./DisplayHtml";
 
 interface Props {}
 
@@ -14,6 +15,7 @@ interface State {
 
 export default class NewDocumentForm extends React.Component<Props, State> {
   static contextType = GlobalContext;
+  private onChangeSelectionCallbackId: number = null;
 
   constructor(props: Props) {
     super(props);
@@ -32,6 +34,17 @@ export default class NewDocumentForm extends React.Component<Props, State> {
         documentName: documentName
       }));
     });
+
+    const selection: Selection = this.context.selection;
+    this.onChangeSelectionCallbackId = selection.onChange(selection => {
+      this.handleSelectionChange(selection);
+    });
+    this.handleSelectionChange(selection);
+  }
+
+  componentWillUnmount() {
+    const selection: Selection = this.context.selection;
+    selection.onChangeUnsubscribe(this.onChangeSelectionCallbackId);
   }
 
   handleDocumentNameChange = (event, value) => {
@@ -42,12 +55,10 @@ export default class NewDocumentForm extends React.Component<Props, State> {
     }
   };
 
-  handleDocumentDescriptionChange = (event, value) => {
-    if (event) {
-      this.setState(() => ({
-        documentDescription: value
-      }));
-    }
+  handleSelectionChange = (selection: Selection) => {
+    this.setState(() => ({
+      documentDescription: selection.getSelectionHtml()
+    }));
   };
 
   createDocument = () => {
@@ -74,7 +85,7 @@ export default class NewDocumentForm extends React.Component<Props, State> {
       <Stack>
         <h2>New Document</h2>
         <TextField label="Document name" value={this.state.documentName} onChange={this.handleDocumentNameChange} />
-        <SelectionOverview label="Document description" onChange={this.handleDocumentDescriptionChange} />
+        <DisplayHtml label="Document description" value={this.state.documentDescription} />
         <PrimaryButton onClick={this.createDocument}>
           Create document
           {this.state.creatingDocument && <Spinner size={SpinnerSize.xSmall} style={{ marginLeft: "5px" }} />}

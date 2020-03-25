@@ -15,6 +15,8 @@ interface State {
 export default class ImportView extends React.Component<Props, State> {
   static contextType = GlobalContext;
 
+  private onChangeProjectStoreCallbackId: number = null;
+
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -26,15 +28,20 @@ export default class ImportView extends React.Component<Props, State> {
       }
     };
   }
-  
+
   componentDidMount() {
     // On souscrit aux changements du projectStore
     const projectStore: ProjectStore = this.context.projectStore;
-    projectStore.onChange(store => {
+    this.onChangeProjectStoreCallbackId = projectStore.onChange(store => {
       this.setState({
         selectedElementLocation: store.selectedElementLocation
-      })
+      });
     });
+  }
+
+  componentWillUnmount() {
+    const projectStore: ProjectStore = this.context.projectStore;
+    projectStore.onChangeUnsubscribe(this.onChangeProjectStoreCallbackId);
   }
 
   render() {

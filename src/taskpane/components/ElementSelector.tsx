@@ -33,6 +33,8 @@ interface State {
 export default class ElementSelector extends React.Component<Props, State> {
   static contextType = GlobalContext;
 
+  private onChangeProjectStoreCallbackId: number = null;
+
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -54,7 +56,7 @@ export default class ElementSelector extends React.Component<Props, State> {
   componentDidMount() {
     // On souscrit aux changements du projectStore
     const projectStore: ProjectStore = this.context.projectStore;
-    projectStore.onChange(store => {
+    this.onChangeProjectStoreCallbackId = projectStore.onChange(store => {
       this.setState({
         projectsOptions: Object.values(store.projects).map((project: Project) => {
           return {
@@ -112,6 +114,11 @@ export default class ElementSelector extends React.Component<Props, State> {
         navStore.setNav(NavOption.Settings, "Authentication failed. Maybe your API key expired.");
       }
     });
+  }
+
+  componentWillUnmount() {
+    const projectStore: ProjectStore = this.context.projectStore;
+    projectStore.onChangeUnsubscribe(this.onChangeProjectStoreCallbackId);
   }
 
   loadUserProjects() {

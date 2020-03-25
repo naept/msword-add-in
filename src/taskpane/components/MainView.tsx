@@ -4,6 +4,7 @@ import SettingsView from "./SettingsView";
 import ImportView from "./ImportView";
 import { GlobalContext } from "../context/GlobalContext";
 import { MessageBar, MessageBarType } from "office-ui-fabric-react";
+import NavStore from "../store/NavStore";
 
 interface Props {}
 
@@ -15,6 +16,8 @@ interface State {
 class MainView extends React.Component<Props, State> {
   static contextType = GlobalContext;
 
+  private onChangeNavStoreCallbackId: number = null;
+
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -24,14 +27,19 @@ class MainView extends React.Component<Props, State> {
   }
 
   componentDidMount() {
-    const navStore = this.context.navStore;
+    const navStore: NavStore = this.context.navStore;
     // On souscrit aux changements du store
-    navStore.onChange(store => {
+    this.onChangeNavStoreCallbackId = navStore.onChange(store => {
       this.setState({
         currentNav: store.nav,
         errorMessage: store.errorMessage
       });
     });
+  }
+
+  componentWillUnmount() {
+    const navStore: NavStore = this.context.navStore;
+    navStore.onChangeUnsubscribe(this.onChangeNavStoreCallbackId);
   }
 
   render() {
