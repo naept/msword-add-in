@@ -12,6 +12,7 @@ interface State {
   categoryName: string;
   categoryDescription: string;
   creatingCategory: boolean;
+  errors: {};
 }
 
 export default class NewCategoryForm extends React.Component<Props, State> {
@@ -24,7 +25,8 @@ export default class NewCategoryForm extends React.Component<Props, State> {
       autoCategoryName: true,
       categoryName: "",
       categoryDescription: "",
-      creatingCategory: false
+      creatingCategory: false,
+      errors: {}
     };
   }
 
@@ -84,6 +86,12 @@ export default class NewCategoryForm extends React.Component<Props, State> {
         name: this.state.categoryName,
         description: this.state.categoryDescription
       })
+      .catch(error => {
+        this.setState(() => ({
+          errors: error.errors
+        }));
+        console.error(error);
+      })
       .finally(() => {
         this.setState({
           creatingCategory: false
@@ -101,8 +109,17 @@ export default class NewCategoryForm extends React.Component<Props, State> {
           inlineLabel
           onChange={this.handleToggleChange}
         />
-        <TextField label="Category name" value={this.state.categoryName} onChange={this.handleCategoryNameChange} />
-        <DisplayHtml label="Category description" value={this.state.categoryDescription} />
+        <TextField
+          label="Category name"
+          value={this.state.categoryName}
+          onChange={this.handleCategoryNameChange}
+          errorMessage={this.state.errors["name"]}
+        />
+        <DisplayHtml
+          label="Category description"
+          value={this.state.categoryDescription}
+          errorMessage={this.state.errors["description"]}
+        />
         <PrimaryButton onClick={this.createDocument}>
           Create category
           {this.state.creatingCategory && <Spinner size={SpinnerSize.xSmall} style={{ marginLeft: "5px" }} />}

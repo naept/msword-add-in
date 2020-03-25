@@ -8,6 +8,7 @@ const NaeptApi = {
                 'Accept'            : 'application/json',
                 'Content-Type'      : 'application/json',
                 'Authorization'     : 'Bearer ' + localStorage.getItem('API_Key'),
+                'Accept-Language'   : 'en',
             },
             ...options
         })

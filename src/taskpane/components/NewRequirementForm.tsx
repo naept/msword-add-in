@@ -12,6 +12,7 @@ interface State {
   requirementName: string;
   requirementDescription: string;
   creatingRequirement: boolean;
+  errors: {};
 }
 
 export default class NewRequirementForm extends React.Component<Props, State> {
@@ -24,7 +25,8 @@ export default class NewRequirementForm extends React.Component<Props, State> {
       autoRequirementName: true,
       requirementName: "",
       requirementDescription: "",
-      creatingRequirement: false
+      creatingRequirement: false,
+      errors: {}
     };
   }
 
@@ -85,6 +87,12 @@ export default class NewRequirementForm extends React.Component<Props, State> {
         name: this.state.requirementName,
         description: this.state.requirementDescription
       })
+      .catch(error => {
+        this.setState(() => ({
+          errors: error.errors
+        }));
+        console.error(error);
+      })
       .finally(() => {
         this.setState({
           creatingRequirement: false
@@ -106,8 +114,13 @@ export default class NewRequirementForm extends React.Component<Props, State> {
           label="Requirement name"
           value={this.state.requirementName}
           onChange={this.handleRequirementNameChange}
+          errorMessage={this.state.errors["name"]}
         />
-        <DisplayHtml label="Requirement description" value={this.state.requirementDescription} />
+        <DisplayHtml
+          label="Requirement description"
+          value={this.state.requirementDescription}
+          errorMessage={this.state.errors["description"]}
+        />
         <PrimaryButton onClick={this.createDocument}>
           Create requirement
           {this.state.creatingRequirement && <Spinner size={SpinnerSize.xSmall} style={{ marginLeft: "5px" }} />}

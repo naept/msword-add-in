@@ -11,6 +11,7 @@ interface State {
   documentName: string;
   documentDescription: string;
   creatingDocument: boolean;
+  errors: {};
 }
 
 export default class NewDocumentForm extends React.Component<Props, State> {
@@ -22,7 +23,8 @@ export default class NewDocumentForm extends React.Component<Props, State> {
     this.state = {
       documentName: "",
       documentDescription: "",
-      creatingDocument: false
+      creatingDocument: false,
+      errors: {}
     };
   }
 
@@ -73,6 +75,12 @@ export default class NewDocumentForm extends React.Component<Props, State> {
         name: this.state.documentName,
         description: this.state.documentDescription
       })
+      .catch(error => {
+        this.setState(() => ({
+          errors: error.errors
+        }));
+        console.error(error);
+      })
       .finally(() => {
         this.setState({
           creatingDocument: false
@@ -84,8 +92,17 @@ export default class NewDocumentForm extends React.Component<Props, State> {
     return (
       <Stack>
         <h2>New Document</h2>
-        <TextField label="Document name" value={this.state.documentName} onChange={this.handleDocumentNameChange} />
-        <DisplayHtml label="Document description" value={this.state.documentDescription} />
+        <TextField
+          label="Document name"
+          value={this.state.documentName}
+          onChange={this.handleDocumentNameChange}
+          errorMessage={this.state.errors["name"]}
+        />
+        <DisplayHtml
+          label="Document description"
+          value={this.state.documentDescription}
+          errorMessage={this.state.errors["description"]}
+        />
         <PrimaryButton onClick={this.createDocument}>
           Create document
           {this.state.creatingDocument && <Spinner size={SpinnerSize.xSmall} style={{ marginLeft: "5px" }} />}
