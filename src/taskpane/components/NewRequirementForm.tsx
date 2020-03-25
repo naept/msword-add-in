@@ -1,6 +1,15 @@
 import * as React from "react";
 import { GlobalContext } from "../context/GlobalContext";
-import { Stack, TextField, PrimaryButton, Spinner, SpinnerSize, Toggle, MessageBar, MessageBarType } from "office-ui-fabric-react";
+import {
+  Stack,
+  TextField,
+  PrimaryButton,
+  Spinner,
+  SpinnerSize,
+  Toggle,
+  MessageBar,
+  MessageBarType
+} from "office-ui-fabric-react";
 import ProjectStore from "../store/ProjectStore";
 import Selection from "../app/Selection";
 import DisplayHtml from "./DisplayHtml";
@@ -119,7 +128,9 @@ export default class NewRequirementForm extends React.Component<Props, State> {
     return (
       <Stack>
         <h2>New Requirement</h2>
-        {this.state.displaySuccessMessageBar && <MessageBar messageBarType={MessageBarType.success} >Requirement successfully created</MessageBar>}
+        {this.state.displaySuccessMessageBar && (
+          <MessageBar messageBarType={MessageBarType.success}>Requirement successfully created</MessageBar>
+        )}
         <Toggle
           label="First paragraph is the title"
           checked={this.state.autoRequirementName}

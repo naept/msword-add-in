@@ -1,5 +1,8 @@
 import * as React from "react";
 import { TextField, PrimaryButton, Link } from "office-ui-fabric-react";
+import { GlobalContext } from "../context/GlobalContext";
+import { NavOption } from "../interfaces";
+import NavStore from "../store/NavStore";
 
 export interface Props {}
 
@@ -8,6 +11,8 @@ export interface State {
 }
 
 class SettingsView extends React.Component<Props, State> {
+  static contextType = GlobalContext;
+
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -35,6 +40,8 @@ class SettingsView extends React.Component<Props, State> {
 
   clickOnValidate = () => {
     localStorage.setItem("API_Key", this.state.apiKey);
+    const navStore: NavStore = this.context.navStore;
+    navStore.setNav(NavOption.Main);
   };
 
   render() {

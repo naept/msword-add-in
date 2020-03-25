@@ -15,6 +15,7 @@ import {
 } from "office-ui-fabric-react";
 import { Project, Document } from "../interfaces";
 import ProjectStore from "../store/ProjectStore";
+import NavStore from "../store/NavStore";
 
 interface Props {
   onChange?: (newValue: ElementLocation) => void;
@@ -109,7 +110,7 @@ export default class ElementSelector extends React.Component<Props, State> {
 
     this.loadUserProjects().catch(error => {
       if (error.error === "Unauthenticated.") {
-        const navStore = this.context.navStore;
+        const navStore: NavStore = this.context.navStore;
         navStore.setNav(NavOption.Settings, "Authentication failed. Maybe your API key expired.");
       }
     });
