@@ -1,10 +1,11 @@
 import * as React from "react";
+import { ElementLocation } from "../interfaces";
+import { GlobalContext } from "../context/GlobalContext";
 import ElementSelector from "./ElementSelector";
 import NewDocumentForm from "./NewDocumentForm";
-import { ElementLocation } from "../interfaces";
 import ProjectStore from "../store/ProjectStore";
-import { GlobalContext } from "../context/GlobalContext";
 import NewCategoryForm from "./NewCategoryForm";
+import NewRequirementForm from "./NewRequirementForm";
 
 interface Props {}
 
@@ -23,8 +24,7 @@ export default class ImportView extends React.Component<Props, State> {
       selectedElementLocation: {
         projectId: "",
         documentId: "",
-        categoryId: "",
-        requirementId: ""
+        categoryId: ""
       }
     };
   }
@@ -50,6 +50,8 @@ export default class ImportView extends React.Component<Props, State> {
         <ElementSelector />
         {this.state.selectedElementLocation.documentId === "addNewDocument" && <NewDocumentForm />}
         {this.state.selectedElementLocation.categoryId === "addNewCategory" && <NewCategoryForm />}
+        {this.state.selectedElementLocation.categoryId !== "" &&
+          this.state.selectedElementLocation.categoryId !== "addNewCategory" && <NewRequirementForm />}
       </section>
     );
   }

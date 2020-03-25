@@ -8,23 +8,23 @@ import DisplayHtml from "./DisplayHtml";
 interface Props {}
 
 interface State {
-  autoCategoryName: boolean;
-  categoryName: string;
-  categoryDescription: string;
-  creatingCategory: boolean;
+  autoRequirementName: boolean;
+  requirementName: string;
+  requirementDescription: string;
+  creatingRequirement: boolean;
 }
 
-export default class NewCategoryForm extends React.Component<Props, State> {
+export default class NewRequirementForm extends React.Component<Props, State> {
   static contextType = GlobalContext;
   private onChangeSelectionCallbackId: number = null;
 
   constructor(props: Props) {
     super(props);
     this.state = {
-      autoCategoryName: true,
-      categoryName: "",
-      categoryDescription: "",
-      creatingCategory: false
+      autoRequirementName: true,
+      requirementName: "",
+      requirementDescription: "",
+      creatingRequirement: false
     };
   }
 
@@ -45,7 +45,7 @@ export default class NewCategoryForm extends React.Component<Props, State> {
     if (event) {
       this.setState(
         () => ({
-          autoCategoryName: checked
+          autoRequirementName: checked
         }),
         () => {
           const selection: Selection = this.context.selection;
@@ -55,18 +55,20 @@ export default class NewCategoryForm extends React.Component<Props, State> {
     }
   };
 
-  handleCategoryNameChange = (event, value) => {
+  handleRequirementNameChange = (event, value) => {
     if (event) {
       this.setState(() => ({
-        categoryName: value
+        requirementName: value
       }));
     }
   };
 
   handleSelectionChange = (selection: Selection) => {
     this.setState(() => ({
-      categoryName: this.state.autoCategoryName ? selection.getSelectionFirstParagraphText() : this.state.categoryName,
-      categoryDescription: this.state.autoCategoryName
+      requirementName: this.state.autoRequirementName
+        ? selection.getSelectionFirstParagraphText()
+        : this.state.requirementName,
+      requirementDescription: this.state.autoRequirementName
         ? selection.getSelectionLastParagraphsHtml()
         : selection.getSelectionHtml()
     }));
@@ -75,18 +77,17 @@ export default class NewCategoryForm extends React.Component<Props, State> {
   createDocument = () => {
     const projectStore: ProjectStore = this.context.projectStore;
     this.setState({
-      creatingCategory: true
+      creatingRequirement: true
     });
     return projectStore
-      .createCategoryAsync({
-        id: null,
-        document_id: projectStore.selectedElementLocation.documentId,
-        name: this.state.categoryName,
-        description: this.state.categoryDescription
+      .createRequirementAsync({
+        category_id: projectStore.selectedElementLocation.categoryId,
+        name: this.state.requirementName,
+        description: this.state.requirementDescription
       })
       .finally(() => {
         this.setState({
-          creatingCategory: false
+          creatingRequirement: false
         });
       });
   };
@@ -94,18 +95,22 @@ export default class NewCategoryForm extends React.Component<Props, State> {
   render() {
     return (
       <Stack>
-        <h2>New Category</h2>
+        <h2>New Requirement</h2>
         <Toggle
           label="First paragraph is the title"
-          checked={this.state.autoCategoryName}
+          checked={this.state.autoRequirementName}
           inlineLabel
           onChange={this.handleToggleChange}
         />
-        <TextField label="Category name" value={this.state.categoryName} onChange={this.handleCategoryNameChange} />
-        <DisplayHtml label="Category description" value={this.state.categoryDescription} />
+        <TextField
+          label="Requirement name"
+          value={this.state.requirementName}
+          onChange={this.handleRequirementNameChange}
+        />
+        <DisplayHtml label="Requirement description" value={this.state.requirementDescription} />
         <PrimaryButton onClick={this.createDocument}>
-          Create category
-          {this.state.creatingCategory && <Spinner size={SpinnerSize.xSmall} style={{ marginLeft: "5px" }} />}
+          Create requirement
+          {this.state.creatingRequirement && <Spinner size={SpinnerSize.xSmall} style={{ marginLeft: "5px" }} />}
         </PrimaryButton>
       </Stack>
     );

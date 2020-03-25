@@ -73,9 +73,9 @@ export default class NewDocumentForm extends React.Component<Props, State> {
         name: this.state.documentName,
         description: this.state.documentDescription
       })
-      .then(() => {
+      .finally(() => {
         this.setState({
-          creatingDocument: true
+          creatingDocument: false
         });
       });
   };

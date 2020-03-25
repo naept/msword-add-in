@@ -44,8 +44,7 @@ export default class ElementSelector extends React.Component<Props, State> {
       elementLocation: {
         projectId: "",
         documentId: "",
-        categoryId: "",
-        requirementId: ""
+        categoryId: ""
       },
       loadingProjects: false,
       loadingDocuments: false,
@@ -201,8 +200,7 @@ export default class ElementSelector extends React.Component<Props, State> {
     projectStore.setSelectedElementLocation({
       projectId: this.state.elementLocation.projectId,
       documentId: this.state.elementLocation.documentId,
-      categoryId: this.state.elementLocation.categoryId,
-      requirementId: ""
+      categoryId: this.state.elementLocation.categoryId
     });
   }
 

@@ -4,11 +4,10 @@ import { Stack, Label } from "office-ui-fabric-react";
 
 interface Props {
   label?: string;
-  value: string
+  value: string;
 }
 
-interface State {
-}
+interface State {}
 
 const selectionDivStyle = {
   backgroundColor: "white",

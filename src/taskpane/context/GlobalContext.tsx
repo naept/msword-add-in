@@ -5,7 +5,7 @@ import Selection from "../app/Selection";
 
 export const GlobalContext = React.createContext({});
 
-export const GlobalProvider = props => {
+export const GlobalProvider = (props: any) => {
   const navStore: NavStore = new NavStore();
   const projectStore: ProjectStore = new ProjectStore();
   const selection: Selection = new Selection();

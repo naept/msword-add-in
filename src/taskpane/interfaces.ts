@@ -1,7 +1,3 @@
-export interface Credentials {
-  email: string;
-  password: string;
-}
 
 export interface Project {
   id: string;
@@ -22,18 +18,19 @@ export interface Category {
   description: string;
 }
 
-export interface User {
+export interface Requirement {
+  category_id: string;
   name: string;
-}
-
-export enum NavOption {
-  Main = "MAIN",
-  Settings = "SETTINGS"
+  description: string;
 }
 
 export interface ElementLocation {
   projectId: string;
   documentId: string;
   categoryId: string;
-  requirementId: string;
+}
+
+export enum NavOption {
+  Main = "MAIN",
+  Settings = "SETTINGS"
 }

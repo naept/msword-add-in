@@ -1,5 +1,5 @@
 import NaeptApi from "../../naept/NaeptApi";
-import { Project, Document, Category, ElementLocation } from "../interfaces";
+import { Project, Document, Category, ElementLocation, Requirement } from "../interfaces";
 
 declare type ChangeCallback = (store: ProjectStore) => void;
 
@@ -10,8 +10,7 @@ export default class ProjectStore {
   public selectedElementLocation: ElementLocation = {
     projectId: "",
     documentId: "",
-    categoryId: "",
-    requirementId: ""
+    categoryId: ""
   };
 
   private callbacks: {} = {};
@@ -41,7 +40,9 @@ export default class ProjectStore {
   }
 
   getAccessibleCategories() {
-    return Object.values(this.categories).filter((category: Category) => category.document_id === this.selectedElementLocation.documentId)
+    return Object.values(this.categories).filter(
+      (category: Category) => category.document_id === this.selectedElementLocation.documentId
+    );
   }
 
   loadUserProjectsAsync() {
@@ -87,12 +88,18 @@ export default class ProjectStore {
     });
   }
 
+  createRequirementAsync(requirement: Requirement) {
+    return NaeptApi.fetchNaeptApi("requirements", {
+      method: "POST",
+      body: JSON.stringify({ ...requirement, phase: 1, progress: 100 })
+    });
+  }
+
   setSelectedElementLocation(elementLocation: ElementLocation) {
     this.selectedElementLocation = {
       projectId: elementLocation.projectId,
       documentId: elementLocation.documentId,
-      categoryId: elementLocation.documentId === "addNewDocument" ? "" : elementLocation.categoryId,
-      requirementId: elementLocation.categoryId === "addNewCategory" ? "" : elementLocation.requirementId
+      categoryId: elementLocation.documentId === "addNewDocument" ? "" : elementLocation.categoryId
     };
     this.inform();
   }
