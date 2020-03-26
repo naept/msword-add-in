@@ -46,19 +46,19 @@ export default class ProjectStore {
   }
 
   loadUserProjectsAsync() {
-    this.clearProjects();
-    this.clearDocuments();
-    this.clearCategories();
     return NaeptApi.fetchNaeptApi("user/projects").then(response => {
+      this.clearProjects();
+      this.clearDocuments();
+      this.clearCategories();
       let projects = response.data;
       projects.forEach((project: Project) => this.addProject(project));
     });
   }
 
   loadProjectStructureAsync(project_id: string) {
-    this.clearDocuments();
-    this.clearCategories();
     return NaeptApi.fetchNaeptApi("projects/structure/" + project_id).then(response => {
+      this.clearDocuments();
+      this.clearCategories();
       let documents = response.data.documents;
       documents.forEach((document: Document) => this.addDocument(document));
       let categories = response.data.categories;

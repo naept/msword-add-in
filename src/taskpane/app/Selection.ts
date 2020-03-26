@@ -1,19 +1,17 @@
 import SelectionCleaner from "./SelectionCleaner";
 import SelectionSplitter from "./SelectionSplitter";
+import SelectionImager from "./SelectionImager";
 
 declare type ChangeCallback = (selection: Selection) => void;
 export default class Selection {
   private selectionFull: HTMLDivElement = null;
-  private selectionFirstParagraph: HTMLDivElement = null;
-  private selectionLastParagraphs: HTMLDivElement = null;
+  private selectionPictures: string[] = [];
 
   private callbacks: {} = {};
   private nextCallbackId: number = 0;
 
   constructor() {
     this.selectionFull = document.createElement("div");
-    this.selectionFirstParagraph = document.createElement("div");
-    this.selectionLastParagraphs = document.createElement("div");
 
     Office.context.document.addHandlerAsync(Office.EventType.DocumentSelectionChanged, () => {
       this.handleSelectionChange();
@@ -50,25 +48,47 @@ export default class Selection {
   }
 
   getSelectionFirstParagraphText() {
-    return this.selectionFirstParagraph.innerText;
+    const selectionSplitter = new SelectionSplitter();
+    let selectionFirstParagraph: HTMLDivElement = document.createElement("div");
+    selectionFirstParagraph.innerHTML = selectionSplitter.extractFirstElement(this.selectionFull);
+    return selectionFirstParagraph.innerText;
   }
 
   getSelectionLastParagraphsHtml() {
-    return this.selectionLastParagraphs.innerHTML;
+    const selectionSplitter = new SelectionSplitter();
+    return selectionSplitter.extractAllButFirstElement(this.selectionFull);
   }
 
   handleSelectionChange() {
     return Word.run(context => {
       let selection = context.document.getSelection().getHtml();
+      let pictures = context.document.getSelection().inlinePictures;
+      pictures.load();
 
       return context.sync().then(() => {
         this.selectionFull.innerHTML = selection.value;
+
         const selectionCleaner = new SelectionCleaner();
         selectionCleaner.execute(this.selectionFull);
-        const selectionSplitter = new SelectionSplitter();
-        this.selectionFirstParagraph.innerHTML = selectionSplitter.extractFirstElement(this.selectionFull);
-        this.selectionLastParagraphs.innerHTML = selectionSplitter.extractAllButFirstElement(this.selectionFull);
-        this.inform();
+
+        let selectionPictures = pictures.items;
+        if (selectionPictures.length > 0) {
+          let base64ImageSrcs = [];
+          selectionPictures.forEach((picture, idx) => {
+            base64ImageSrcs[idx] = picture.getBase64ImageSrc();
+          });
+          context.sync().then(() => {
+            base64ImageSrcs.forEach((base64ImageSrc, idx) => {
+              this.selectionPictures[idx] = base64ImageSrc.value;
+            });
+
+            const selectionImager = new SelectionImager();
+            selectionImager.execute(this.selectionFull, this.selectionPictures);
+            this.inform();
+          });
+        } else {
+          this.inform();
+        }
       });
     });
   }
