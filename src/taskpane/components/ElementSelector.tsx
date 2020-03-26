@@ -154,7 +154,9 @@ export default class ElementSelector extends React.Component<Props, State> {
         {
           elementLocation: {
             ...projectStore.selectedElementLocation,
-            projectId: item.key.toString()
+            projectId: item.key.toString(),
+            documentId: "",
+            categoryId: ""
           }
         },
         () => this.notifyChange()
@@ -173,7 +175,8 @@ export default class ElementSelector extends React.Component<Props, State> {
         {
           elementLocation: {
             ...projectStore.selectedElementLocation,
-            documentId: item.key.toString()
+            documentId: item.key.toString(),
+            categoryId: ""
           }
         },
         () => this.notifyChange()
