@@ -1,0 +1,20 @@
+version: '3.5'
+
+services:
+  web:
+    image: registry.gitlab.com/argo_dev/naept_addin_msword:${VERSION}
+    expose:
+      - "80"
+    networks:
+      - naeptwork
+    restart: unless-stopped
+    labels:
+      - traefik.docker.network=naeptwork
+      - traefik.http.routers.commercial.rule=Host(`officeaddin.${SERVER_BASE_URL}/msword`)
+      - traefik.http.routers.commercial.entrypoints=websecure
+      - traefik.http.routers.commercial.tls=true
+      - traefik.http.routers.commercial.tls.certresolver=le
+
+networks:
+  naeptwork:
+    external: true
