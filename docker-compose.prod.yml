@@ -10,10 +10,10 @@ services:
     restart: unless-stopped
     labels:
       - traefik.docker.network=naeptwork
-      - traefik.http.routers.commercial.rule=Host(`officeaddin.${SERVER_BASE_URL}/msword`)
-      - traefik.http.routers.commercial.entrypoints=websecure
-      - traefik.http.routers.commercial.tls=true
-      - traefik.http.routers.commercial.tls.certresolver=le
+      - traefik.http.routers.msword_addin.rule=Host(`officeaddin.${SERVER_BASE_URL}/msword`)
+      - traefik.http.routers.msword_addin.entrypoints=websecure
+      - traefik.http.routers.msword_addin.tls=true
+      - traefik.http.routers.msword_addin.tls.certresolver=le
 
 networks:
   naeptwork:
