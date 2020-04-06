@@ -7,4 +7,4 @@ RUN npm run build
 
 FROM nginx:alpine
 ADD vhost.conf /etc/nginx/conf.d/default.conf
-COPY --from=build_js /var/www/dist/ /var/www/msword_addin
+COPY --from=build_js /var/www/dist/ /var/www/msword_addin/msword
