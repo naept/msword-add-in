@@ -1,0 +1,119 @@
+stages:
+  - Tag version
+  - Build and release docker image
+  - Deploy on server
+  
+version-tagging:
+  stage: Tag version
+  only:
+    - develop
+    - master
+  artifacts:
+    paths:
+      - ci_shared/
+    expire_in: 6 months
+  before_script:
+    - which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )
+    - mkdir -p ~/.ssh
+    - echo "$GIT_AUTO_TAG_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_rsa
+    - chmod 600 ~/.ssh/id_rsa
+    - eval "$(ssh-agent -s)"
+    - ssh-add ~/.ssh/id_rsa
+    - ssh-keyscan -H gitlab.com >> ~/.ssh/known_hosts
+
+    - git config --global user.email $(git --no-pager show -s --format='%ae' HEAD)
+    - git config --global user.name $(git --no-pager show -s --format='%an' HEAD)
+    - git remote set-url --push origin git@gitlab.com:$CI_PROJECT_PATH.git
+
+    - mkdir -p ci_shared
+  script:
+    - git checkout ${CI_COMMIT_REF_NAME}
+    - git show -s --format=%cI | sed -e 's/20/v/' -e 's/-/./g' -e 's/://g' -e 's/T/./g' | cut -c 1-16 | sed 's/$/-'"${CI_COMMIT_REF_NAME}"'/' > ci_shared/version_tag
+    - export VERSION=$(cat ci_shared/version_tag)
+    - git tag -a $VERSION ${CI_COMMIT_SHORT_SHA} -m "Version $VERSION"
+    - git push origin $VERSION
+
+docker_build_and_release:
+  stage: Build and release docker image
+  only:
+    - develop
+    - master
+  image: docker
+  services:
+    - docker:dind
+  variables:
+    DOCKER_DRIVER: "overlay"
+  artifacts:
+    paths:
+      - ci_shared/
+    expire_in: 6 months
+  before_script:
+    - docker version
+    - docker info
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
+
+    - mkdir -p ci_shared
+    - export VERSION=$(cat ci_shared/version_tag)
+  script:
+    - docker build -t ${CI_REGISTRY}/${CI_PROJECT_PATH}:${VERSION} --pull .
+    - docker push ${CI_REGISTRY}/${CI_PROJECT_PATH}:${VERSION}
+  after_script:
+    - docker logout ${CI_REGISTRY}
+
+deploy_stage:
+  stage: Deploy on server
+  environment: staging
+  only:
+    - develop
+    - master
+  image: docker
+  services:
+    - docker:dind
+  artifacts:
+    paths:
+      - ci_shared/
+    expire_in: 6 months
+  before_script:
+    - which ssh-agent || ( apk update && apk add openssh-client )
+    - mkdir -p ~/.ssh
+    - echo "$STAGE_SERVER_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_rsa
+    - chmod 600 ~/.ssh/id_rsa
+    - eval "$(ssh-agent -s)"
+    - ssh-add ~/.ssh/id_rsa
+    - ssh-keyscan -H $STAGING_SERVER_IP >> ~/.ssh/known_hosts
+    
+    - mkdir -p ci_shared
+    - export VERSION=$(cat ci_shared/version_tag)
+  script:
+    - ssh root@$STAGING_SERVER_IP "mkdir -p naept_addin_msword;"
+    - scp docker-compose.prod.yml root@${STAGING_SERVER_IP}:~/naept_addin_msword/docker-compose.yml
+    - ssh root@$STAGING_SERVER_IP "cd ~/naept_addin_msword/; docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}; docker-compose rm --stop --force; docker pull ${CI_REGISTRY}/${CI_PROJECT_PATH}:${VERSION}; SERVER_BASE_URL=stage.naept.com VERSION=$VERSION docker-compose up -d"
+
+deploy_prod:
+  stage: Deploy on server
+  environment: production
+  when: manual
+  only:
+    - master
+  image: docker
+  services:
+    - docker:dind
+  artifacts:
+    paths:
+      - ci_shared/
+    expire_in: 6 months
+  before_script:
+    - which ssh-agent || ( apk update && apk add openssh-client )
+    - mkdir -p ~/.ssh
+    - echo "$MAIN_SERVER_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_rsa
+    - chmod 600 ~/.ssh/id_rsa
+    - eval "$(ssh-agent -s)"
+    - ssh-add ~/.ssh/id_rsa
+    - ssh-keyscan -H $MAIN_SERVER_IP >> ~/.ssh/known_hosts
+    
+    - mkdir -p ci_shared
+    - export VERSION=$(cat ci_shared/version_tag)
+  script:
+    - ssh root@$MAIN_SERVER_IP "mkdir -p naept_addin_msword;"
+    - scp docker-compose.prod.yml root@${MAIN_SERVER_IP}:~/naept_addin_msword/docker-compose.yml
+    - ssh root@$MAIN_SERVER_IP "cd ~/naept_addin_msword/; docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}; docker-compose rm --stop --force; docker pull ${CI_REGISTRY}/${CI_PROJECT_PATH}:${VERSION}; SERVER_BASE_URL=naept.com VERSION=$VERSION docker-compose up -d"
