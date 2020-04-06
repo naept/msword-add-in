@@ -86,7 +86,7 @@ deploy_stage:
     - export VERSION=$(cat ci_shared/version_tag)
   script:
     - ssh root@$STAGING_SERVER_IP "mkdir -p naept_addin_msword;"
-    - scp docker-compose.staging.yml root@${STAGING_SERVER_IP}:~/naept_addin_msword/docker-compose.yml
+    - scp docker-compose.prod.yml root@${STAGING_SERVER_IP}:~/naept_addin_msword/docker-compose.yml
     - ssh root@$STAGING_SERVER_IP "cd ~/naept_addin_msword/; docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}; docker-compose rm --stop --force; docker pull ${CI_REGISTRY}/${CI_PROJECT_PATH}:${VERSION}; SERVER_BASE_URL=stage.naept.com VERSION=$VERSION docker-compose up -d"
 
 deploy_prod:
@@ -115,5 +115,5 @@ deploy_prod:
     - export VERSION=$(cat ci_shared/version_tag)
   script:
     - ssh root@$MAIN_SERVER_IP "mkdir -p naept_addin_msword;"
-    - scp docker-compose.staging.yml root@${MAIN_SERVER_IP}:~/naept_addin_msword/docker-compose.yml
+    - scp docker-compose.prod.yml root@${MAIN_SERVER_IP}:~/naept_addin_msword/docker-compose.yml
     - ssh root@$MAIN_SERVER_IP "cd ~/naept_addin_msword/; docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}; docker-compose rm --stop --force; docker pull ${CI_REGISTRY}/${CI_PROJECT_PATH}:${VERSION}; SERVER_BASE_URL=naept.com VERSION=$VERSION docker-compose up -d"
