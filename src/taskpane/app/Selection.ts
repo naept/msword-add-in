@@ -51,7 +51,7 @@ export default class Selection {
     const selectionSplitter = new SelectionSplitter();
     let selectionFirstParagraph: HTMLDivElement = document.createElement("div");
     selectionFirstParagraph.innerHTML = selectionSplitter.extractFirstElement(this.selectionFull);
-    return selectionFirstParagraph.innerText;
+    return selectionFirstParagraph.innerText.replace(/–/g, "-");
   }
 
   getSelectionLastParagraphsHtml() {
