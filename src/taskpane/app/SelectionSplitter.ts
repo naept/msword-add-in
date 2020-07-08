@@ -13,6 +13,16 @@ export default class SelectionSplitter {
       htmlObjectCopy.removeChild(htmlObjectCopy.firstChild);
     }
 
+    htmlObjectCopy.innerHTML = removeEmptyFirstLines(htmlObjectCopy.innerHTML)
+
     return htmlObjectCopy.innerHTML;
   }
+}
+
+function removeEmptyFirstLines(text) {
+  let output = text
+  while (output.startsWith("<p></p>")) {
+    output = output.substring(7)
+  }
+  return output
 }
