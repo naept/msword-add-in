@@ -84,7 +84,9 @@ export default class NewCategoryForm extends React.Component<Props, State> {
         id: null,
         document_id: projectStore.selectedElementLocation.documentId,
         name: this.state.categoryName,
-        description: this.state.categoryDescription
+        description: this.state.categoryDescription,
+        _lft: null,
+        _rgt: null
       })
       .catch(error => {
         this.setState(() => ({

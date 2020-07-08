@@ -16,6 +16,8 @@ export interface Category {
   document_id: string;
   name: string;
   description: string;
+  _lft: number;
+  _rgt: number;
 }
 
 export interface Requirement {

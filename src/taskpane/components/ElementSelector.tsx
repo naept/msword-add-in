@@ -58,14 +58,17 @@ export default class ElementSelector extends React.Component<Props, State> {
     const projectStore: ProjectStore = this.context.projectStore;
     this.onChangeProjectStoreCallbackId = projectStore.onChange(store => {
       this.setState({
-        projectsOptions: Object.values(store.projects).map((project: Project) => {
-          return {
-            key: project.id,
-            text: project.name,
-            itemType: SelectableOptionMenuItemType.Normal
-          };
-        }),
+        projectsOptions: Object.values(store.projects)
+          .sort((a: Project, b: Project) => a.name.localeCompare(b.name))
+          .map((project: Project) => {
+            return {
+              key: project.id,
+              text: project.name,
+              itemType: SelectableOptionMenuItemType.Normal
+            };
+          }),
         documentsOptions: Object.values(store.documents)
+          .sort((a: Document, b: Document) => a.name.localeCompare(b.name))
           .map((document: Document) => {
             return {
               key: document.id,
@@ -86,11 +89,19 @@ export default class ElementSelector extends React.Component<Props, State> {
             }
           ]),
         categoriesOptions: Object.values(store.getAccessibleCategories())
-          .map((category: Category) => {
+          .sort((a: Category, b: Category) => a._lft - b._lft)
+          .map((category: Category, _index, array: []) => {
+            var depth = array.filter(
+              (element: Category) => element._lft < category._lft && element._rgt > category._rgt,
+            ).length
+            let categoryNameIndent = ""
+            for (let i = 0; i < depth; i++) {
+              categoryNameIndent += "-  "
+            }
             return {
               key: category.id,
-              text: category.name,
-              itemType: SelectableOptionMenuItemType.Normal
+              text: categoryNameIndent + category.name,
+              itemType: SelectableOptionMenuItemType.Normal,
             };
           })
           .concat([
