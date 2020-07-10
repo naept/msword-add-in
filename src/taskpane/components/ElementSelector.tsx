@@ -94,26 +94,27 @@ export default class ElementSelector extends React.Component<Props, State> {
             var depth = array.filter(
               (element: Category) => element._lft < category._lft && element._rgt > category._rgt,
             ).length
-            let categoryNameIndent = ""
-            for (let i = 0; i < depth; i++) {
-              categoryNameIndent += "-  "
-            }
             return {
               key: category.id,
-              text: categoryNameIndent + category.name,
+              text: category.name,
               itemType: SelectableOptionMenuItemType.Normal,
+              data: {
+                depth: depth
+              }
             };
           })
           .concat([
             {
               key: "divider",
               text: "-",
-              itemType: SelectableOptionMenuItemType.Divider
+              itemType: SelectableOptionMenuItemType.Divider,
+              data: null
             },
             {
               key: "addNewCategory",
               text: "Add new category",
-              itemType: SelectableOptionMenuItemType.Normal
+              itemType: SelectableOptionMenuItemType.Normal,
+              data: null
             }
           ])
       });
@@ -210,6 +211,35 @@ export default class ElementSelector extends React.Component<Props, State> {
     }
   };
 
+  onRenderOption = (option: IDropdownOption): JSX.Element => {
+    const indent = []
+
+    if (option.data && option.data.depth) {
+      for (let index = 0; index < option.data.depth; index++) {
+        indent.push(<span>&emsp;</span>)
+      }
+    }
+
+    return (
+      <span>{indent}{option.text}</span>
+    )
+  };
+
+  onRenderTitle = (options: IDropdownOption[]): JSX.Element => {
+    const option = options[0];
+    const indent = []
+
+    if (option.data && option.data.depth) {
+      for (let index = 0; index < option.data.depth; index++) {
+        indent.push(<span>&emsp;</span>)
+      }
+    }
+
+    return (
+      <span>{indent}{option.text}</span>
+    )
+  };
+
   notifyChange() {
     const projectStore: ProjectStore = this.context.projectStore;
     projectStore.setSelectedElementLocation({
@@ -261,6 +291,8 @@ export default class ElementSelector extends React.Component<Props, State> {
             this.state.loadingCategories
           }
           responsiveMode={ResponsiveMode.large}
+          onRenderOption={this.onRenderOption}
+          onRenderTitle={this.onRenderTitle}
         />
       </section>
     );
