@@ -88,21 +88,30 @@ export default class ElementSelector extends React.Component<Props, State> {
               itemType: SelectableOptionMenuItemType.Normal
             }
           ]),
-        categoriesOptions: Object.values(store.getAccessibleCategories())
-          .sort((a: Category, b: Category) => a._lft - b._lft)
-          .map((category: Category, _index, array: []) => {
-            var depth = array.filter(
-              (element: Category) => element._lft < category._lft && element._rgt > category._rgt,
-            ).length
-            return {
-              key: category.id,
-              text: category.name,
+        categoriesOptions: [
+            {
+              key: "",
+              text: "No category",
               itemType: SelectableOptionMenuItemType.Normal,
-              data: {
-                depth: depth
-              }
-            };
-          })
+              data: null
+            }
+          ]
+          .concat(Object.values(store.getAccessibleCategories())
+            .sort((a: Category, b: Category) => a._lft - b._lft)
+            .map((category: Category, _index, array: []) => {
+              var depth = array.filter(
+                (element: Category) => element._lft < category._lft && element._rgt > category._rgt,
+              ).length
+              return {
+                key: category.id,
+                text: category.name,
+                itemType: SelectableOptionMenuItemType.Normal,
+                data: {
+                  depth: depth
+                }
+              };
+            })
+          )
           .concat([
             {
               key: "divider",
@@ -258,6 +267,7 @@ export default class ElementSelector extends React.Component<Props, State> {
           {this.state.loadingProjects && <Spinner size={SpinnerSize.xSmall} />}
         </Stack>
         <Dropdown
+          placeholder="Select a project"
           options={this.state.projectsOptions}
           onChange={this.handleProjectSelectChange}
           selectedKey={projectStore.selectedElementLocation.projectId}
@@ -270,6 +280,7 @@ export default class ElementSelector extends React.Component<Props, State> {
           {this.state.loadingDocuments && <Spinner size={SpinnerSize.xSmall} />}
         </Stack>
         <Dropdown
+          placeholder="Select a document"
           options={this.state.documentsOptions}
           onChange={this.handleDocumentSelectChange}
           selectedKey={projectStore.selectedElementLocation.documentId}

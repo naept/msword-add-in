@@ -50,7 +50,7 @@ export default class ImportView extends React.Component<Props, State> {
         <ElementSelector />
         {this.state.selectedElementLocation.documentId === "addNewDocument" && <NewDocumentForm />}
         {this.state.selectedElementLocation.categoryId === "addNewCategory" && <NewCategoryForm />}
-        {this.state.selectedElementLocation.categoryId !== "" &&
+        {this.state.selectedElementLocation.documentId !== "" &&
           this.state.selectedElementLocation.categoryId !== "addNewCategory" && <NewRequirementForm />}
       </section>
     );

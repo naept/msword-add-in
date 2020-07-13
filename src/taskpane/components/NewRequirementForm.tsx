@@ -93,19 +93,24 @@ export default class NewRequirementForm extends React.Component<Props, State> {
     }));
   };
 
-  createDocument = () => {
+  createRequirement = () => {
     const projectStore: ProjectStore = this.context.projectStore;
     this.setState({
       creatingRequirement: true,
       displaySuccessMessageBar: false,
       errors: {}
     });
+    const requirement = {
+      document_id: projectStore.selectedElementLocation.documentId,
+      category_id: null,
+      name: this.state.requirementName,
+      description: this.state.requirementDescription
+    }
+    if (projectStore.selectedElementLocation.categoryId !== "") {
+      requirement.category_id = projectStore.selectedElementLocation.categoryId
+    }
     return projectStore
-      .createRequirementAsync({
-        category_id: projectStore.selectedElementLocation.categoryId,
-        name: this.state.requirementName,
-        description: this.state.requirementDescription
-      })
+      .createRequirementAsync(requirement)
       .then(() => {
         this.setState(() => ({
           displaySuccessMessageBar: true
@@ -148,7 +153,7 @@ export default class NewRequirementForm extends React.Component<Props, State> {
           value={this.state.requirementDescription}
           errorMessage={this.state.errors["description"]}
         />
-        <PrimaryButton onClick={this.createDocument}>
+        <PrimaryButton onClick={this.createRequirement}>
           Create requirement
           {this.state.creatingRequirement && <Spinner size={SpinnerSize.xSmall} style={{ marginLeft: "5px" }} />}
         </PrimaryButton>
