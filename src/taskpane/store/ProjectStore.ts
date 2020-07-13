@@ -85,6 +85,8 @@ export default class ProjectStore {
       let category: Category = response.data;
       this.addCategory(category);
       this.setSelectedCategoryLocation(category.id);
+      let documentCategories = response.documentCategories;
+      documentCategories.forEach((category: Category) => this.addCategory(category));
     });
   }
 

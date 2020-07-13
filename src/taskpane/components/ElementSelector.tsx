@@ -112,20 +112,6 @@ export default class ElementSelector extends React.Component<Props, State> {
               };
             })
           )
-          .concat([
-            {
-              key: "divider",
-              text: "-",
-              itemType: SelectableOptionMenuItemType.Divider,
-              data: null
-            },
-            {
-              key: "addNewCategory",
-              text: "Add new category",
-              itemType: SelectableOptionMenuItemType.Normal,
-              data: null
-            }
-          ])
       });
     });
 
@@ -262,7 +248,7 @@ export default class ElementSelector extends React.Component<Props, State> {
     const projectStore: ProjectStore = this.context.projectStore;
     return (
       <section>
-        <Stack horizontal={true} verticalAlign="center" tokens={{ childrenGap: 10 }}>
+        <Stack horizontal verticalAlign="center" tokens={{ childrenGap: 10 }}>
           <Label>Select a project</Label>
           {this.state.loadingProjects && <Spinner size={SpinnerSize.xSmall} />}
         </Stack>
@@ -275,7 +261,7 @@ export default class ElementSelector extends React.Component<Props, State> {
           responsiveMode={ResponsiveMode.large}
         />
 
-        <Stack horizontal={true} verticalAlign="center" tokens={{ childrenGap: 10 }}>
+        <Stack horizontal verticalAlign="center" tokens={{ childrenGap: 10 }}>
           <Label>Select a document</Label>
           {this.state.loadingDocuments && <Spinner size={SpinnerSize.xSmall} />}
         </Stack>
@@ -288,7 +274,7 @@ export default class ElementSelector extends React.Component<Props, State> {
           responsiveMode={ResponsiveMode.large}
         />
 
-        <Stack horizontal={true} verticalAlign="center" tokens={{ childrenGap: 10 }}>
+        <Stack horizontal verticalAlign="center" tokens={{ childrenGap: 10 }}>
           <Label>Select a category</Label>
           {this.state.loadingCategories && <Spinner size={SpinnerSize.xSmall} />}
         </Stack>

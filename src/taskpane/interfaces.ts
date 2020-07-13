@@ -14,6 +14,7 @@ export interface Document {
 export interface Category {
   id: string;
   document_id: string;
+  parent_id: string;
   name: string;
   description: string;
   _lft: number;
