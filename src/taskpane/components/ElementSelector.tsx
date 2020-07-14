@@ -58,14 +58,17 @@ export default class ElementSelector extends React.Component<Props, State> {
     const projectStore: ProjectStore = this.context.projectStore;
     this.onChangeProjectStoreCallbackId = projectStore.onChange(store => {
       this.setState({
-        projectsOptions: Object.values(store.projects).map((project: Project) => {
-          return {
-            key: project.id,
-            text: project.name,
-            itemType: SelectableOptionMenuItemType.Normal
-          };
-        }),
+        projectsOptions: Object.values(store.projects)
+          .sort((a: Project, b: Project) => a.name.localeCompare(b.name))
+          .map((project: Project) => {
+            return {
+              key: project.id,
+              text: project.name,
+              itemType: SelectableOptionMenuItemType.Normal
+            };
+          }),
         documentsOptions: Object.values(store.documents)
+          .sort((a: Document, b: Document) => a.name.localeCompare(b.name))
           .map((document: Document) => {
             return {
               key: document.id,
@@ -85,26 +88,30 @@ export default class ElementSelector extends React.Component<Props, State> {
               itemType: SelectableOptionMenuItemType.Normal
             }
           ]),
-        categoriesOptions: Object.values(store.getAccessibleCategories())
-          .map((category: Category) => {
-            return {
-              key: category.id,
-              text: category.name,
-              itemType: SelectableOptionMenuItemType.Normal
-            };
-          })
-          .concat([
+        categoriesOptions: [
             {
-              key: "divider",
-              text: "-",
-              itemType: SelectableOptionMenuItemType.Divider
-            },
-            {
-              key: "addNewCategory",
-              text: "Add new category",
-              itemType: SelectableOptionMenuItemType.Normal
+              key: "",
+              text: "No category",
+              itemType: SelectableOptionMenuItemType.Normal,
+              data: null
             }
-          ])
+          ]
+          .concat(Object.values(store.getAccessibleCategories())
+            .sort((a: Category, b: Category) => a._lft - b._lft)
+            .map((category: Category, _index, array: []) => {
+              var depth = array.filter(
+                (element: Category) => element._lft < category._lft && element._rgt > category._rgt,
+              ).length
+              return {
+                key: category.id,
+                text: category.name,
+                itemType: SelectableOptionMenuItemType.Normal,
+                data: {
+                  depth: depth
+                }
+              };
+            })
+          )
       });
     });
 
@@ -199,6 +206,35 @@ export default class ElementSelector extends React.Component<Props, State> {
     }
   };
 
+  onRenderOption = (option: IDropdownOption): JSX.Element => {
+    const indent = []
+
+    if (option.data && option.data.depth) {
+      for (let index = 0; index < option.data.depth; index++) {
+        indent.push(<span>&emsp;</span>)
+      }
+    }
+
+    return (
+      <span>{indent}{option.text}</span>
+    )
+  };
+
+  onRenderTitle = (options: IDropdownOption[]): JSX.Element => {
+    const option = options[0];
+    const indent = []
+
+    if (option.data && option.data.depth) {
+      for (let index = 0; index < option.data.depth; index++) {
+        indent.push(<span>&emsp;</span>)
+      }
+    }
+
+    return (
+      <span>{indent}{option.text}</span>
+    )
+  };
+
   notifyChange() {
     const projectStore: ProjectStore = this.context.projectStore;
     projectStore.setSelectedElementLocation({
@@ -212,11 +248,12 @@ export default class ElementSelector extends React.Component<Props, State> {
     const projectStore: ProjectStore = this.context.projectStore;
     return (
       <section>
-        <Stack horizontal={true} verticalAlign="center" tokens={{ childrenGap: 10 }}>
+        <Stack horizontal verticalAlign="center" tokens={{ childrenGap: 10 }}>
           <Label>Select a project</Label>
           {this.state.loadingProjects && <Spinner size={SpinnerSize.xSmall} />}
         </Stack>
         <Dropdown
+          placeholder="Select a project"
           options={this.state.projectsOptions}
           onChange={this.handleProjectSelectChange}
           selectedKey={projectStore.selectedElementLocation.projectId}
@@ -224,11 +261,12 @@ export default class ElementSelector extends React.Component<Props, State> {
           responsiveMode={ResponsiveMode.large}
         />
 
-        <Stack horizontal={true} verticalAlign="center" tokens={{ childrenGap: 10 }}>
+        <Stack horizontal verticalAlign="center" tokens={{ childrenGap: 10 }}>
           <Label>Select a document</Label>
           {this.state.loadingDocuments && <Spinner size={SpinnerSize.xSmall} />}
         </Stack>
         <Dropdown
+          placeholder="Select a document"
           options={this.state.documentsOptions}
           onChange={this.handleDocumentSelectChange}
           selectedKey={projectStore.selectedElementLocation.documentId}
@@ -236,7 +274,7 @@ export default class ElementSelector extends React.Component<Props, State> {
           responsiveMode={ResponsiveMode.large}
         />
 
-        <Stack horizontal={true} verticalAlign="center" tokens={{ childrenGap: 10 }}>
+        <Stack horizontal verticalAlign="center" tokens={{ childrenGap: 10 }}>
           <Label>Select a category</Label>
           {this.state.loadingCategories && <Spinner size={SpinnerSize.xSmall} />}
         </Stack>
@@ -250,6 +288,8 @@ export default class ElementSelector extends React.Component<Props, State> {
             this.state.loadingCategories
           }
           responsiveMode={ResponsiveMode.large}
+          onRenderOption={this.onRenderOption}
+          onRenderTitle={this.onRenderTitle}
         />
       </section>
     );
